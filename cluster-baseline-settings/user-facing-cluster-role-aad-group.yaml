@@ -14,7 +14,7 @@ roleRef:
   name: cluster-admin
 subjects:
   - kind: Group
-    name: <replace-with-an-aad-group-object-id-for-this-cluster-role-binding>
+    name: ab3b7911-36c7-43af-831f-8f1ef9f47820
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -26,7 +26,7 @@ roleRef:
   name: admin
 subjects:
   - kind: Group
-    name: <replace-with-an-aad-group-object-id-for-this-cluster-role-binding>
+    name: eac0d228-cff2-4796-bc97-92630a7bb116
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -38,7 +38,7 @@ roleRef:
   name: edit
 subjects:
   - kind: Group
-    name: <replace-with-an-aad-group-object-id-for-this-cluster-role-binding>
+    name: 56eb7b84-5f34-40c6-bce1-83793fadcefa
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -50,4 +50,4 @@ roleRef:
   name: view
 subjects:
   - kind: Group
-    name: <replace-with-an-aad-group-object-id-for-this-cluster-role-binding>
+    name: 719db6ef-e749-4290-b693-e07d1edddf31

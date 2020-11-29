@@ -261,7 +261,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "2019-09-01",
-            "name": "[concat( variables('keyVaultName') , '/appgw-ingress-internal-aks-ingress-contoso-com-tls')]",
+            "name": "[concat( variables('keyVaultName') , '/appgw-ingress-internal-aks-ingress-ajdev-com-tls')]",
             "dependsOn": [
                 "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
             ],
@@ -273,7 +273,7 @@
         {
             "type": "Microsoft.Network/privateDnsZones",
             "apiVersion": "2018-09-01",
-            "name": "aks-ingress.contoso.com",
+            "name": "aks-ingress.ajdev.com",
             "location": "global",
             "resources": [
                 {
@@ -281,7 +281,7 @@
                     "apiVersion": "2018-09-01",
                     "name": "bu0001a0008-00",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Network/privateDnsZones', 'aks-ingress.contoso.com')]"
+                        "[resourceId('Microsoft.Network/privateDnsZones', 'aks-ingress.ajdev.com')]"
                     ],
                     "properties": {
                         "ttl": 3600,
@@ -299,10 +299,10 @@
         {
             "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
             "apiVersion": "2018-09-01",
-            "name": "[concat('aks-ingress.contoso.com/cluster-dns-link')]",
+            "name": "[concat('aks-ingress.ajdev.com/cluster-dns-link')]",
             "location": "global",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones','aks-ingress.contoso.com')]"
+                "[resourceId('Microsoft.Network/privateDnsZones','aks-ingress.ajdev.com')]"
             ],
             "properties": {
                 "virtualNetwork": {
@@ -348,9 +348,9 @@
                 },
                 "trustedRootCertificates": [
                     {
-                        "name": "root-cert-wildcard-aks-ingress-contoso",
+                        "name": "root-cert-wildcard-aks-ingress-ajdev",
                         "properties": {
-                            "keyVaultSecretId": "[concat(reference(variables('keyVaultName')).vaultUri,'secrets/appgw-ingress-internal-aks-ingress-contoso-com-tls')]"
+                            "keyVaultSecretId": "[concat(reference(variables('keyVaultName')).vaultUri,'secrets/appgw-ingress-internal-aks-ingress-ajdev-com-tls')]"
                         }
                     }
                 ],
@@ -403,7 +403,7 @@
                 ],
                 "probes": [
                     {
-                        "name": "probe-bu0001a0008-00.aks-ingress.contoso.com",
+                        "name": "probe-bu0001a0008-00.aks-ingress.ajdev.com",
                         "properties": {
                             "protocol": "Https",
                             "path": "/favicon.ico",
@@ -419,11 +419,11 @@
                 ],
                 "backendAddressPools": [
                     {
-                        "name": "bu0001a0008-00.aks-ingress.contoso.com",
+                        "name": "bu0001a0008-00.aks-ingress.ajdev.com",
                         "properties": {
                             "backendAddresses": [
                                 {
-                                    "fqdn": "bu0001a0008-00.aks-ingress.contoso.com"
+                                    "fqdn": "bu0001a0008-00.aks-ingress.ajdev.com"
                                 }
                             ]
                         }
@@ -431,7 +431,7 @@
                 ],
                 "backendHttpSettingsCollection": [
                     {
-                        "name": "aks-ingress-contoso-backendpool-httpsettings",
+                        "name": "aks-ingress-ajdev-backendpool-httpsettings",
                         "properties": {
                             "port": 443,
                             "protocol": "Https",
@@ -439,11 +439,11 @@
                             "pickHostNameFromBackendAddress": true,
                             "requestTimeout": 20,
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('agwName')),'/probes/probe-bu0001a0008-00.aks-ingress.contoso.com')]"
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('agwName')),'/probes/probe-bu0001a0008-00.aks-ingress.ajdev.com')]"
                             },
                             "trustedRootCertificates": [
                                 {
-                                    "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('agwName')), '/trustedRootCertificates/root-cert-wildcard-aks-ingress-contoso')]"
+                                    "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('agwName')), '/trustedRootCertificates/root-cert-wildcard-aks-ingress-ajdev')]"
                                 }
                             ]
                         }
@@ -463,7 +463,7 @@
                             "sslCertificate": {
                                 "id": "[concat(variables('apwResourceId'), '/sslCertificates/', variables('agwName'), '-ssl-certificate')]"
                             },
-                            "hostName": "bicycle.contoso.com",
+                            "hostName": "bicycle.ajdev.com",
                             "hostNames": [
                             ],
                             "requireServerNameIndication": true
@@ -479,10 +479,10 @@
                                 "id": "[concat(variables('apwResourceId'), '/httpListeners/listener-https')]"
                             },
                             "backendAddressPool": {
-                                "id": "[concat(variables('apwResourceId'), '/backendAddressPools/bu0001a0008-00.aks-ingress.contoso.com')]"
+                                "id": "[concat(variables('apwResourceId'), '/backendAddressPools/bu0001a0008-00.aks-ingress.ajdev.com')]"
                             },
                             "backendHttpSettings": {
-                                "id": "[concat(variables('apwResourceId'), '/backendHttpSettingsCollection/aks-ingress-contoso-backendpool-httpsettings')]"
+                                "id": "[concat(variables('apwResourceId'), '/backendHttpSettingsCollection/aks-ingress-ajdev-backendpool-httpsettings')]"
                             }
                         }
                     }
