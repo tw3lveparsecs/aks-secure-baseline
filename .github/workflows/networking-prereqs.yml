@@ -6,7 +6,7 @@ on:
     branches:
     - main
     paths:
-    - poc/armtemplates/LogAnalytics/*
+    - poc/armtemplates/LogAnalyticsWorkspace/*
     - poc/armtemplates/StorageAccount/*
     - poc/armtemplates/Firewall/*
     - poc/armtemplates/NetworkWatcher/*
@@ -20,7 +20,7 @@ on:
     branches:
     - poc
     paths:
-    - poc/armtemplates/LogAnalytics/*
+    - poc/armtemplates/LogAnalyticsWorkspace/*
     - poc/armtemplates/StorageAccount/*
     - poc/armtemplates/Firewall/*
     - poc/armtemplates/NetworkWatcher/*
@@ -83,7 +83,7 @@ jobs:
         path: |
           ./.github/actions/setvars
           ./.github/variables
-          poc/armtemplates/LogAnalytics/*
+          poc/armtemplates/LogAnalyticsWorkspace/*
           poc/armtemplates/StorageAccount/*
           poc/armtemplates/Firewall/*
           poc/armtemplates/NetworkWatcher/*
