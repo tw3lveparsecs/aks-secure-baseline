@@ -1,0 +1,100 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "value": null
+    },
+    "diagnosticStorageAccountName": {
+      "value": null
+    },
+    "diagnosticStorageAccountResourceGroup": {
+      "value": null
+    },
+    "logAnalyticsWorkspaceName": {
+      "value": null
+    },
+    "logAnalyticsSubscriptionID": {
+      "value": null
+    },
+    "logAnalyticsResourceGroup": {
+      "value": null
+    },
+    "addressPrefixes": {
+      "value": [
+        "10.0.0.0/16"
+      ]
+    },
+    "dhcpOptions": {
+      "value": {
+        "dnsServers": [
+          /* Add custom DNS servers when Domain Controllers have been configured
+          "10.0.6.4",
+          "10.0.6.5",
+          "10.1.2.3"
+          */
+        ]
+      }
+    },
+    "subnets": {
+      "value": [
+        {
+          "name": "AzureBastionSubnet",
+          "addressPrefix": "10.0.0.0/24",
+          "networkSecurityGroup": "shd-mel-azurebastionsubnet-nsg",
+          "routeTable": null,
+          "privateEndpointNetworkPolicies": "Enabled"
+        },
+        {
+          "name": "AzureWAFSubnet",
+          "addressPrefix": "10.0.1.0/24",
+          "networkSecurityGroup": null,
+          "routeTable": null,
+          "privateEndpointNetworkPolicies": "Enabled"
+        },
+        {
+          "name": "AzureFirewallSubnet",
+          "addressPrefix": "10.0.2.0/24",
+          "networkSecurityGroup": null,
+          "routeTable": null,
+          "privateEndpointNetworkPolicies": "Enabled"
+        },
+        {
+          "name": "AzureFirewallManagementSubnet",
+          "addressPrefix": "10.0.3.0/24",
+          "networkSecurityGroup": null,
+          "routeTable": null,
+          "privateEndpointNetworkPolicies": "Enabled"
+        },
+        {
+          "name": "AzureDevopsSubnet",
+          "addressPrefix": "10.0.4.0/24",
+          "networkSecurityGroup": "shd-mel-azuredevopssubnet-nsg",
+          "routeTable": "shd-mel-azuredevopssubnet-udr",
+          "privateEndpointNetworkPolicies": "Enabled"
+        },
+        {
+          "name": "GatewaySubnet",
+          "addressPrefix": "10.0.5.0/24",
+          "networkSecurityGroup": null,
+          "routeTable": null,
+          "privateEndpointNetworkPolicies": "Enabled"
+        },
+        {
+          "name": "CoreServices",
+          "addressPrefix": "10.0.6.0/24",
+          "networkSecurityGroup": "shd-mel-coreservices-nsg",
+          "routeTable": "shd-mel-coreservices-udr",
+          "privateEndpointNetworkPolicies": "Enabled"
+        },
+        {
+          "name": "PrivateEndpoints",
+          "addressPrefix": "10.0.7.0/24",
+          "networkSecurityGroup": null,
+          "routeTable": "shd-mel-privateendpoints-udr",
+          "privateEndpointNetworkPolicies": "Disabled"
+        }
+      ]
+    }
+  }
+}

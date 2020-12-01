@@ -1,0 +1,102 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "networkWatcherName": {
+      "value": null
+    },
+    "networkWatcherResourceGroup": {
+      "value": null
+    },
+    "diagnosticStorageAccountName": {
+      "value": null
+    },
+    "diagnosticStorageAccountResourceGroup": {
+      "value": null
+    },
+    "logAnalyticsWorkspaceName": {
+      "value": null
+    },
+    "logAnalyticsSubscriptionID": {
+      "value": null
+    },
+    "logAnalyticsResourceGroup": {
+      "value": null
+    },
+    "nsgName": {
+      "value": "shd-mel-coreservices-nsg"
+    },
+    "securityRules": {
+      "value": [
+        {
+          "name": "AZ_Allow_Inbound_AzureMgt_CoreServices_Any_Any",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "168.63.129.161",
+            "destinationAddressPrefix": "10.0.6.0/24",
+            "access": "Allow",
+            "priority": 100,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ_Allow_Inbound_AzureLB_Any_Any_Any",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "AzureLoadBalancer",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 101,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ_Allow_Inbound_CoreServices_CoreServices_Any_Any",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "10.0.6.0/24",
+            "destinationAddressPrefix": "10.0.6.0/24",
+            "access": "Allow",
+            "priority": 102,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ_Allow_Inbound_Bastion_CoreServices_TCP_RDP-SSH",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRanges": [
+              "3389",
+              "22"
+            ],            
+            "sourceAddressPrefix": "10.0.0.0/24",
+            "destinationAddressPrefix": "10.0.6.0/24",
+            "access": "Allow",
+            "priority": 103,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ_Deny_Inbound_Any_Any_Any_Any",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Deny",
+            "priority": 999,
+            "direction": "Inbound"
+          }
+        }
+      ]
+    }
+  }
+}

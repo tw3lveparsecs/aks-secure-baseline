@@ -1,0 +1,145 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Virtual network name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Virtual network location."
+            }
+        },
+        "addressPrefixes": {
+            "type": "array",
+            "metadata": {
+                "description": "Address space(s) of the virtual network."
+            }
+        },
+        "dhcpOptions": {
+            "type": "object",
+            "metadata": {
+                "description": "Object containing DNS servers for the virtual network."
+            }
+        },
+        "subnets": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing virtual network subnets."
+            }
+        },
+        "diagnosticStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostics storage account name."
+            }
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostics storage account resource group."
+            }
+        },
+        "logAnalyticsWorkspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace."
+            }
+        },
+        "logAnalyticsSubscriptionID": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics subscription Id."
+            }
+        },
+        "logAnalyticsResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace resource group."
+            }
+        }
+    },
+    "variables": {
+        "diagnosticRetentionInDays": 30
+    },
+    "resources": [
+        {
+            "apiVersion": "2020-04-01",
+            "name": "[parameters('vnetname')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": "[parameters('addressPrefixes')]"
+                },
+                "dhcpOptions": "[parameters('dhcpOptions')]",
+                "copy": [
+                    {
+                        "name": "subnets",
+                        "count": "[length(parameters('subnets'))]",
+                        "input": {
+                            "name": "[parameters('subnets')[copyIndex('subnets')].name]",
+                            "properties": {
+                                "addressPrefix": "[parameters('subnets')[copyIndex('subnets')].addressPrefix]",
+                                "networkSecurityGroup": "[if(empty(parameters('subnets')[copyIndex('subnets')].networkSecurityGroup), json('null'), json(concat('{\"id\": \"', resourceId('Microsoft.Network/networksecuritygroups', parameters('subnets')[copyIndex('subnets')].networkSecurityGroup), '\"}')))]",
+                                "routeTable": "[if(empty(parameters('subnets')[copyIndex('subnets')].routeTable), json('null'), json(concat('{\"id\": \"', resourceId('Microsoft.Network/routetables', parameters('subnets')[copyIndex('subnets')].routeTable), '\"}')))]",
+                                "privateEndpointNetworkPolicies": "[parameters('subnets')[copyIndex('subnets')].privateEndpointNetworkPolicies]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/providers/diagnosticSettings",
+            "name": "[concat(parameters('vnetName'), '/Microsoft.Insights/', parameters('vnetName'), '-dgs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ],
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "name": "[concat(parameters('vnetName'), '-dgs')]",
+                "storageAccountId": "[resourceId(parameters('diagnosticStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                "workspaceId": "[resourceId(parameters('logAnalyticsSubscriptionID'), parameters('logAnalyticsResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                "logs": [
+                    {
+                        "category": "VMProtectionAlerts",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ],
+                "metrics": [
+                    {
+                        "category": "AllMetrics",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/providers/locks",
+            "name": "[concat(parameters('vnetname'), '/Microsoft.Authorization/', parameters('vnetname'), '-lck')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetname'))]"
+            ],
+            "apiVersion": "2017-04-01",
+            "properties": {
+                "level": "CannotDelete"
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

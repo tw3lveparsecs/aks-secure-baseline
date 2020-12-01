@@ -1,0 +1,43 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "networkWatcherName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of Network Watcher."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location of Network Watcher."
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "name": "[parameters('networkWatcherName')]",
+            "type": "Microsoft.Network/networkWatchers",
+            "apiVersion": "2020-04-01",
+            "location": "[parameters('location')]",
+            "properties": {
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkWatchers/providers/locks",
+            "name": "[concat(parameters('networkWatcherName'), '/Microsoft.Authorization/', parameters('networkWatcherName'), '-lck')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkWatchers', parameters('networkWatcherName'))]"
+            ],
+            "apiVersion": "2017-04-01",
+            "properties": {
+                "level": "CannotDelete"
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

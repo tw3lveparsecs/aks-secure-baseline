@@ -1,0 +1,171 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "nsgName": {
+            "type": "string",
+            "metadata": {
+                "description": "Network Security Group name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Network Security Group location."
+            }
+        },
+        "networkWatcherName": {
+            "type": "string",
+            "metadata": {
+                "description": "Network Watcher name."
+            }
+        },
+        "networkWatcherResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Network Watcher resource group."
+            }
+        },
+        "securityRules": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing nsg security rules."
+            }
+        },
+        "diagnosticStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostics storage account name."
+            }
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostics storage account resource group."
+            }
+        },
+        "logAnalyticsWorkspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace."
+            }
+        },
+        "logAnalyticsSubscriptionID": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics subscription Id."
+            }
+        },
+        "logAnalyticsResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace resource group."
+            }
+        }
+    },
+    "variables": {
+        "diagnosticRetentionInDays": 30
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-11-01",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[parameters('nsgName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": "[parameters('securityRules')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/providers/diagnosticSettings",
+            "name": "[concat(parameters('nsgName'), '/Microsoft.Insights/', parameters('nsgName'),'-dgs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            ],
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "name": "[concat(parameters('nsgName'),'-dgs')]",
+                "storageAccountId": "[resourceId(parameters('diagnosticStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                "workspaceId": "[resourceId(parameters('logAnalyticsSubscriptionID'), parameters('logAnalyticsResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                "logs": [
+                    {
+                        "category": "NetworkSecurityGroupEvent",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "NetworkSecurityGroupRuleCounter",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/providers/locks",
+            "name": "[concat(parameters('nsgName'), '/Microsoft.Authorization/', parameters('nsgName'), '-lck')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            ],
+            "apiVersion": "2017-04-01",
+            "properties": {
+                "level": "CannotDelete"
+            }
+        },
+        {
+            "apiVersion": "2019-11-01",
+            "name": "DeployNsgFlowLogs",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            ],
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('networkWatcherResourceGroup')]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/networkWatchers/FlowLogs/",
+                            "name": "[concat(parameters('networkWatcherName'), '/', parameters('nsgName'), '-flw')]",
+                            "location": "[parameters('location')]",
+                            "apiVersion": "2019-11-01",
+                            "properties": {
+                                "targetResourceId": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
+                                "storageId": "[resourceId(parameters('diagnosticStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                                "enabled": true,
+                                "flowAnalyticsConfiguration": {
+                                    "networkWatcherFlowAnalyticsConfiguration": {
+                                        "enabled": true,
+                                        "workspaceResourceId": "[resourceId(parameters('logAnalyticsSubscriptionID'), parameters('logAnalyticsResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                                        "trafficAnalyticsInterval": 60
+                                    }
+                                },
+                                "retentionPolicy": {
+                                    "days": "[variables('diagnosticRetentionInDays')]",
+                                    "enabled": true
+                                },
+                                "format": {
+                                    "type": "JSON",
+                                    "version": 2
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

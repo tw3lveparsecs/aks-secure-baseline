@@ -1,0 +1,123 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Virtual network name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Virtual network location."
+            }
+        },
+        "peerVnetName": {
+            "type": "string",
+            "defaultValue": "[newGuid()]",
+            "metadata": {
+                "description": "Virtual network peer name."
+            }
+        },
+        "peerVnetResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Peer virtual network resource group."
+            }
+        },
+        "peerVnetSubscriptionId": {
+            "type": "string",
+            "metadata": {
+                "description": "Peer virtual network subscription id."
+            }
+        },
+        "sharedVnetGatewayEnabled": {
+            "type": "string",
+            "allowedValues": [
+                "yes",
+                "no"
+            ],
+            "metadata": {
+                "description": "Specify if the shared virtual network contains a virutal network gateway."
+            }
+        },
+        "sharedVnet": {
+            "type": "string",
+            "allowedValues": [
+                "yes",
+                "no"
+            ],
+            "metadata": {
+                "description": "Specify if the virtual network is a shared virtual network."
+            }
+        },
+        "spokeToSpokeEnabled": {
+            "type": "string",
+            "allowedValues": [
+                "yes",
+                "no"
+            ],
+            "metadata": {
+                "description": "Configures peering to allow spoke to spoke communication (requires Azure Firewall)."
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-11-01",
+            "condition": "[equals(parameters('spokeToSpokeEnabled'),'no')]",
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+            "name": "[concat(parameters('vnetName'), '/',  substring(uniqueString(parameters('peerVnetName')), 0, 12), '-vpr')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": "[if(equals(parameters('sharedVnet'), 'yes'), 'false', 'true')]",
+                "allowGatewayTransit": "[if(and(equals(parameters('sharedVnetGatewayEnabled'), 'yes'), equals(parameters('sharedVnet'), 'yes')), 'true', 'false')]",
+                "useRemoteGateways": "[if(and(equals(parameters('sharedVnetGatewayEnabled'), 'yes'), equals(parameters('sharedVnet'), 'no')), 'true', 'false')]",
+                "remoteVirtualNetwork": {
+                    "id": "[resourceId(parameters('peerVnetSubscriptionId'), parameters('peerVnetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('peerVnetName'))]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2019-11-01",
+            "name": "VNetPeeringSpoke2Spoke",
+            "condition": "[equals(parameters('spokeToSpokeEnabled'),'yes')]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[resourceGroup().name]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                    },
+                    "resources": [
+                        {
+                            "apiVersion": "2019-11-01",
+                            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                            "name": "[concat(parameters('vnetName'), '/',  substring(uniqueString(parameters('peerVnetName')), 0, 12), '-vpr')]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "allowVirtualNetworkAccess": true,
+                                "allowForwardedTraffic": true,
+                                "allowGatewayTransit": "[if(and(equals(parameters('sharedVnetGatewayEnabled'), 'yes'), equals(parameters('sharedVnet'), 'yes')), 'true', 'false')]",
+                                "useRemoteGateways": "[if(and(equals(parameters('sharedVnetGatewayEnabled'), 'yes'), equals(parameters('sharedVnet'), 'no')), 'true', 'false')]",
+                                "remoteVirtualNetwork": {
+                                    "id": "[resourceId(parameters('peerVnetSubscriptionId'), parameters('peerVnetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('peerVnetName'))]"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

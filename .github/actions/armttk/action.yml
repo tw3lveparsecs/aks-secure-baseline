@@ -1,0 +1,40 @@
+name: 'Run ARM Test Toolkit'
+description: 'Executes ARM Test toolkit on ARM template.'
+inputs:
+  templateFile:
+    description: 'File path to arm template.'
+    required: true
+  testExclusions:
+    description: 'Test exclusions. Comma separated for multiple exclusions.'
+    required: false
+    default: none
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        $template = "${{ inputs.templateFile }}"
+        $exclusions = "${{ inputs.testExclusions }}"
+        if((Test-Path ./arm-ttk/arm-ttk) -eq $false){
+          git clone https://github.com/Azure/arm-ttk.git
+        }
+        import-module ./arm-ttk/arm-ttk
+        try {
+          Remove-Module Pester -ErrorAction SilentlyContinue
+          Import-Module Pester -RequiredVersion 4.10.1 -ErrorAction Stop
+        }
+        catch {
+          $errorMessage = $error[0]
+          if ($errorMessage -like "*no valid module file was found*"){
+              Install-Module Pester -AllowClobber -RequiredVersion 4.10.1 -Force -SkipPublisherCheck -AcceptLicense
+              Import-Module Pester -RequiredVersion 4.10.1 -ErrorAction Stop
+          }
+          else {
+              Write-Error -Message $errorMessage
+          }
+        }
+        $results = Invoke-Pester -Script  @{ Path =  './scripts/Test.ARMTemplate.ps1'; Parameters = @{TemplatePath = './' + $template; Exclusions = $exclusions} } -OutputFormat NUnitXml -OutputFile ./TEST-ARMTemplate.xml -PassThru
+        if ($results.TestResult.Result -contains "Failed"){
+          Write-Error -Message "Test Failed"
+        }
+      shell: pwsh
