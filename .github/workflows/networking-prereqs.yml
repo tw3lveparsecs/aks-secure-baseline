@@ -118,5 +118,5 @@ jobs:
               --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
               --parameters drop/poc/armtemplates/NetworkWatcher/azuredeploy.parameters.json \
               --parameters \
-                location=${{ env.NETWORKWATCHERNAME }} \
-                networkWatcherName=${{ env.LOCATION }}
+                location=${{ env.LOCATION }} \
+                networkWatcherName=${{ env.NETWORKWATCHERNAME }}
