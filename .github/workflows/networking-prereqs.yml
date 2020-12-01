@@ -21,7 +21,7 @@ on:
     - poc
     paths:
     - poc/armtemplates/LogAnalytics/*
-    - poc/armtemplates/StorageAccount/*      
+    - poc/armtemplates/StorageAccount/*
     - poc/armtemplates/Firewall/*
     - poc/armtemplates/NetworkWatcher/*
     - poc/armtemplates/Nsgs/*
@@ -62,12 +62,12 @@ jobs:
     - name: Test ARM template
       uses: ./.github/actions/armttk
       with:
-        templateFile: poc/armtemplates/Vnet/azuredeploy.json      
+        templateFile: poc/armtemplates/Vnet/azuredeploy.json
 
     - name: Test ARM template
       uses: ./.github/actions/armttk
       with:
-        templateFile: poc/armtemplates/VNetPeering/azuredeploy.json    
+        templateFile: poc/armtemplates/VNetPeering/azuredeploy.json
 
   build:
     if: ${{ github.ref == 'refs/heads/poc' }}
@@ -84,13 +84,13 @@ jobs:
           ./.github/actions/setvars
           ./.github/variables
           poc/armtemplates/LogAnalytics/*
-          poc/armtemplates/StorageAccount/*          
+          poc/armtemplates/StorageAccount/*
           poc/armtemplates/Firewall/*
           poc/armtemplates/NetworkWatcher/*
           poc/armtemplates/Nsgs/*
           poc/armtemplates/RouteTable/*
           poc/armtemplates/Vnet/*
-          poc/armtemplates/VNetPeering/*          
+          poc/armtemplates/VNetPeering/*
         if-no-files-found: error
 
   deploy:
@@ -125,16 +125,16 @@ jobs:
               --template-file drop/poc/armtemplates/StorageAccount/azuredeploy.json \
               --parameters drop/poc/armtemplates/StorageAccount/azuredeploy.parameters.json \
               --parameters \
-                storageName=devsydajdev1diagsstg01 \
-                accountType=Standard_LRS \
-                accessTier=Hot \
-                kind=StorageV2 \
-                softDeleteRetentionDays=30         
+                storageName=${{ env.DIAGSTORAGEACCOUNT }} \
+                accountType=${{ env.DIAGSTORAGETYPE }} \
+                accessTier=${{ env.DIAGSTORAGETIER }} \
+                kind=${{ env.DIAGSTORAGEKIND }} \
+                softDeleteRetentionDays=${{ env.DIAGSTORAGERETENTION }}
 
-      - name: Deploy Log Analytics       
+      - name: Deploy Log Analytics
         uses: Azure/cli@v1.0.0
         with:
-          inlineScript: |            
+          inlineScript: |
             az deployment group create \
               --resource-group ${{ env.LARESOURCEGROUP }} \
               --template-file drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.json \
@@ -143,10 +143,10 @@ jobs:
                 workspaceName=${{ env.LAWORKSPACENAME }} \
                 sku=${{ env.LASKU }} \
                 dataRetention=${{ env.LADATARETENTION }} \
-                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \    
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
                 diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }}
 
-      # - name: Deploy Network Watcher        
+      # - name: Deploy Network Watcher
       #   uses: Azure/cli@v1.0.0
       #   with:
       #     inlineScript: |
@@ -159,18 +159,50 @@ jobs:
       #           location=${{ env.LOCATION }} \
       #           networkWatcherName=${{ env.NETWORKWATCHERNAME }}
 
-      # - name: Deploy Nsg - Bastion
-      #   uses: Azure/cli@v1.0.0
-      #   with:
-      #     inlineScript: |            
-      #       az deployment group create \
-      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
-      #         --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
-      #         --parameters drop/poc/armtemplates/NetworkWatcher/shd-bastion.parameters.json \
-      #         --parameters \
-      #           networkWatcherResourceGroup=${{ env.LOCATION }} \
-      #           diagnosticStorageAccountName=${{ env.NETWORKWATCHERNAME }}                
-      #           diagnosticStorageAccountResourceGroup
-      #           logAnalyticsWorkspaceName
-      #           logAnalyticsSubscriptionID
-      #           logAnalyticsResourceGroup
+      - name: Deploy Nsg - Bastion
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
+              --parameters drop/poc/armtemplates/NetworkWatcher/shd-bastion.parameters.json \
+              --parameters \
+                networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+
+      - name: Deploy Nsg - CoreServices
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
+              --parameters drop/poc/armtemplates/NetworkWatcher/shd-coreservices.parameters.json \
+              --parameters \
+                networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+                
+      - name: Deploy Nsg - AzureDevOps
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
+              --parameters drop/poc/armtemplates/NetworkWatcher/shd-devops.parameters.json \
+              --parameters \
+                networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                
