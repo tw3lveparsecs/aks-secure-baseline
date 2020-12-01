@@ -1,0 +1,350 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Virtual network name."
+            }
+        },
+        "firewallName": {
+            "type": "string",
+            "metadata": {
+                "description": "Firewall name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Firewall location."
+            }
+        },
+        "inboundPublicIpName": {
+            "type": "string",
+            "metadata": {
+                "description": "Inbound public IP address name."
+            }
+        },
+        "outboundPublicIpName": {
+            "type": "string",
+            "metadata": {
+                "description": "Outbound public IP address name."
+            }
+        },
+        "firewallPolicyName": {
+            "type": "string",
+            "metadata": {
+                "description": "Firewall Policy name."
+            }
+        },
+        "threatIntelMode": {
+            "type": "string",
+            "allowedValues": [
+                "Alert",
+                "Deny",
+                "Off"
+            ],
+            "metadata": {
+                "description": "The operation mode for Threat Intelligence."
+            }
+        },
+        "networkRules": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing network rules for firewall policy."
+            }
+        },
+        "diagnosticStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostic storage account name."
+            }
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostic storage account resource group."
+            }
+        },
+        "logAnalyticsWorkspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace name."
+            }
+        },
+        "logAnalyticsSubscriptionID": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace subscription Id."
+            }
+        },
+        "logAnalyticsResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace resource group."
+            }
+        }
+    },
+    "variables": {
+        "diagnosticRetentionInDays": 30
+    },
+    "resources": [
+        {
+            "name": "[parameters('inboundPublicIpName')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-02-01",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses/providers/diagnosticSettings",
+            "name": "[concat(parameters('inboundPublicIpName'), '/Microsoft.Insights/', parameters('inboundPublicIpName'), '-dgs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses', parameters('inboundPublicIpName'))]"
+            ],
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "name": "[concat(parameters('inboundPublicIpName'), '-dgs')]",
+                "storageAccountId": "[resourceId(parameters('diagnosticStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                "workspaceId": "[resourceId(parameters('logAnalyticsSubscriptionID'), parameters('logAnalyticsResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                "logs": [
+                    {
+                        "category": "DDoSProtectionNotifications",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "DDoSMitigationFlowLogs",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "DDoSMitigationReports",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ],
+                "metrics": [
+                    {
+                        "category": "AllMetrics",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "enabled": true,
+                            "days": "[variables('diagnosticRetentionInDays')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('outboundPublicIpName')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-02-01",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIpAddresses/providers/diagnosticSettings",
+            "name": "[concat(parameters('outboundPublicIpName'), '/Microsoft.Insights/', parameters('outboundPublicIpName'), '-dgs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses', parameters('outboundPublicIpName'))]"
+            ],
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "name": "[concat(parameters('outboundPublicIpName'), '-dgs')]",
+                "storageAccountId": "[resourceId(parameters('diagnosticStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                "workspaceId": "[resourceId(parameters('logAnalyticsSubscriptionID'), parameters('logAnalyticsResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                "logs": [
+                    {
+                        "category": "DDoSProtectionNotifications",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "DDoSMitigationFlowLogs",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "DDoSMitigationReports",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ],
+                "metrics": [
+                    {
+                        "category": "AllMetrics",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "enabled": true,
+                            "days": "[variables('diagnosticRetentionInDays')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('firewallPolicyName')]",
+            "type": "Microsoft.Network/firewallPolicies",
+            "apiVersion": "2020-06-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "threatIntelMode": "[parameters('threatIntelMode')]"
+            }
+        },
+        {
+            "apiVersion": "2019-11-01",
+            "type": "Microsoft.Network/firewallPolicies/ruleGroups",
+            "name": "[concat(parameters('firewallPolicyName'), '/', parameters('networkRules')[copyIndex()].ruleGroupName)]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "policyloop",
+                "count": "[length(parameters('networkRules'))]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/firewallPolicies', parameters('firewallPolicyName'))]"
+            ],
+            "properties": {
+                "priority": "[parameters('networkRules')[copyIndex()].priority]",
+                "rules": "[parameters('networkRules')[copyIndex()].rules]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/firewallPolicies/providers/locks",
+            "name": "[concat(parameters('firewallPolicyName'), '/Microsoft.Authorization/', parameters('firewallPolicyName'), '-lck')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/firewallPolicies', parameters('firewallPolicyName'))]"
+            ],
+            "apiVersion": "2017-04-01",
+            "properties": {
+                "level": "CannotDelete"
+            }
+        },
+        {
+            "name": "[parameters('firewallName')]",
+            "type": "Microsoft.Network/azureFirewalls",
+            "apiVersion": "2020-06-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('inboundPublicIpName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('outboundPublicIpName'))]",
+                "[resourceId('Microsoft.Network/firewallPolicies', parameters('firewallPolicyName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[parameters('inboundPublicIpName')]",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), 'AzureFirewallSubnet')]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('inboundPublicIpName'))]"
+                            }
+                        }
+                    }
+                ],
+                "managementIpConfiguration": {
+                    "name": "[parameters('outboundPublicIpName')]",
+                    "properties": {
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), 'AzureFirewallManagementSubnet')]"
+                        },
+                        "publicIPAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('outboundPublicIpName'))]"
+                        }
+                    }
+                },
+                "firewallPolicy": {
+                    "id": "[resourceId('Microsoft.Network/firewallPolicies', parameters('firewallPolicyName'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/azureFirewalls/providers/diagnosticSettings",
+            "name": "[concat(parameters('firewallName'), '/Microsoft.Insights/', parameters('firewallName'), '-dgs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/azureFirewalls', parameters('firewallName'))]"
+            ],
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "name": "[concat(parameters('firewallName'), '-dgs')]",
+                "storageAccountId": "[resourceId(parameters('diagnosticStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                "workspaceId": "[resourceId(parameters('logAnalyticsSubscriptionID'), parameters('logAnalyticsResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                "logs": [
+                    {
+                        "category": "AzureFirewallApplicationRule",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "AzureFirewallNetworkRule",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ],
+                "metrics": [
+                    {
+                        "category": "AllMetrics",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/azureFirewalls/providers/locks",
+            "name": "[concat(parameters('firewallName'), '/Microsoft.Authorization/', parameters('firewallName'), '-lck')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/azureFirewalls', parameters('firewallName'))]"
+            ],
+            "apiVersion": "2017-04-01",
+            "properties": {
+                "level": "CannotDelete"
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

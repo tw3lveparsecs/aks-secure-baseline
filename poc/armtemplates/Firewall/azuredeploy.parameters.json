@@ -1,0 +1,365 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "firewallName": {
+            "value": null
+        },
+        "vnetName": {
+            "value": null
+        },
+        "firewallPolicyName": {
+            "value": null
+        },
+        "threatIntelMode": {
+            "value": null
+        },
+        "inboundPublicIpName": {
+            "value": null
+        },
+        "outboundPublicIpName": {
+            "value": null
+        },
+        "diagnosticStorageAccountName": {
+            "value": null
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "value": null
+        },
+        "logAnalyticsWorkspaceName": {
+            "value": null
+        },
+        "logAnalyticsSubscriptionID": {
+            "value": null
+        },
+        "logAnalyticsResourceGroup": {
+            "value": null
+        },
+        "networkRules": {
+            "value": [
+                {
+                    "ruleGroupName": "Global",
+                    "priority": 100,
+                    "rules": [
+                        {
+                            "name": "Org-Network-Policy",
+                            "priority": 100,
+                            "ruleType": "FirewallPolicyFilterRule",
+                            "action": {
+                                "type": "Allow"
+                            },
+                            "ruleConditions": [
+                                {
+                                    "name": "azure-management",
+                                    "ipProtocols": [
+                                        "Any"
+                                    ],
+                                    "destinationPorts": [
+                                        "*"
+                                    ],
+                                    "sourceAddresses": [
+                                        "168.63.129.16"
+                                    ],
+                                    "destinationAddresses": [
+                                        "*"
+                                    ],
+                                    "ruleConditionType": "NetworkRuleCondition"
+                                },
+                                {
+                                    "name": "dns",
+                                    "ipProtocols": [
+                                        "UDP"
+                                    ],
+                                    "destinationPorts": [
+                                        "53"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*"
+                                    ],
+                                    "destinationAddresses": [
+                                        "*"
+                                    ],
+                                    "ruleConditionType": "NetworkRuleCondition"
+                                },
+                                {
+                                    "name": "ntp",
+                                    "ipProtocols": [
+                                        "UDP"
+                                    ],
+                                    "destinationPorts": [
+                                        "123"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*"
+                                    ],
+                                    "destinationAddresses": [
+                                        "*"
+                                    ],
+                                    "ruleConditionType": "NetworkRuleCondition"
+                                },
+                                {
+                                    "name": "internet",
+                                    "ipProtocols": [
+                                        "TCP"
+                                    ],
+                                    "destinationPorts": [
+                                        "80",
+                                        "443"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*"
+                                    ],
+                                    "destinationAddresses": [
+                                        "*"
+                                    ],
+                                    "ruleConditionType": "NetworkRuleCondition"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "AKS-Network-Policy",
+                            "priority": 200,
+                            "ruleType": "FirewallPolicyFilterRule",
+                            "action": {
+                                "type": "Allow"
+                            },
+                            "ruleConditions": [
+                                {
+                                    "name": "tunnel-front-pod-tcp",
+                                    "description": "Tunnel front pod to communicate with the tunnel end on the API server.  Technically only needed to our API servers.",
+                                    "ipProtocols": [
+                                        "TCP"
+                                    ],
+                                    "destinationPorts": [
+                                        "22",
+                                        "9000"
+                                    ],
+                                    "sourceAddresses": [
+                                        "168.63.129.16" //AKS subnet
+                                    ],
+                                    "destinationAddresses": [
+                                        "*"
+                                    ],
+                                    "ruleConditionType": "NetworkRuleCondition"
+                                },
+                                {
+                                    "name": "tunnel-front-pod-udp",
+                                    "description": "Tunnel front pod to communicate with the tunnel end on the API server.  Technically only needed to our API servers.",
+                                    "ipProtocols": [
+                                        "UDP"
+                                    ],
+                                    "destinationPorts": [
+                                        "1194"
+                                    ],
+                                    "sourceAddresses": [
+                                        "168.63.129.16" //AKS subnet
+                                    ],
+                                    "destinationAddresses": [
+                                        "*"
+                                    ],
+                                    "ruleConditionType": "NetworkRuleCondition"
+                                }                                
+                            ]
+                        },
+                        {
+                            "name": "AKS-Application-Policy",
+                            "priority": 300,
+                            "ruleType": "FirewallPolicyFilterRule",
+                            "action": {
+                                "type": "Allow"
+                            },
+                            "ruleConditions": [                                
+                                {
+                                    "name": "nodes-to-api-server",
+                                    "description": "This address is required for Node <-> API server communication.",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Https",
+                                            "port": 443
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "*.hcp.australiaeast.azmk8s.io",
+                                        "*.tun.australiaeast.azmk8s.io",
+                                        "*.hcp.australiasoutheast.azmk8s.io",
+                                        "*.tun.australiasoutheast.azmk8s.io"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                },
+                                {
+                                    "name": "microsoft-container-registry",
+                                    "description": "All URLs related to MCR needed by AKS",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Https",
+                                            "port": 443
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "*.cdn.mscr.io",
+                                        "mcr.microsoft.com",
+                                        "*.data.mcr.microsoft.com"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                },
+                                {
+                                    "name": "management-plane",
+                                    "description": "This address is required for Kubernetes GET/PUT operations.",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Https",
+                                            "port": 443
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "management.azure.com"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                },
+                                {
+                                    "name": "aad-auth",
+                                    "description": "This address is required for Azure Active Directory authentication.",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Https",
+                                            "port": 443
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "login.microsoftonline.com"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                },
+                                {
+                                    "name": "apt-get",
+                                    "description": "This address is the Microsoft packages repository used for cached apt-get operations. Example packages include Moby, PowerShell, and Azure CLI.",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Https",
+                                            "port": 443
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "packages.microsoft.com"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                },
+                                {
+                                    "name": "cluster-binaries",
+                                    "description": "This address is for the repository required to install required binaries like kubenet and Azure CNI.",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Https",
+                                            "port": 443
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "acs-mirror.azureedge.net"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                },
+                                {
+                                    "name": "ubuntu-security-patches",
+                                    "description": "This address lets the Linux cluster nodes download the required security patches and updates.",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Http",
+                                            "port": 80
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "security.ubuntu.com",
+                                        "azure.archive.ubuntu.com",
+                                        "changelogs.ubuntu.com"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                },
+                                {
+                                    "name": "azure-monitor",
+                                    "description": "All required for Azure Monitor for containers per https://docs.microsoft.com/en-us/azure/aks/limit-egress-traffic#required-addresses-and-ports-with-azure-monitor-for-containers-enabled",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Https",
+                                            "port": 443
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "dc.services.visualstudio.com",
+                                        "*.ods.opinsights.azure.com",
+                                        "*.oms.opinsights.azure.com",
+                                        "*.microsoftonline.com",
+                                        "*.monitoring.azure.com"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                },
+                                {
+                                    "name": "azure-policy",
+                                    "description": "All required for Azure Policy per https://docs.microsoft.com/en-us/azure/aks/limit-egress-traffic#required-addresses-and-ports-for-aks-clusters-with-azure-policy-in-public-preview-enabled",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Https",
+                                            "port": 443
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "gov-prod-policy-data.trafficmanager.net",
+                                        "raw.githubusercontent.com",
+                                        "*.gk.australiaeast.azmk8s.io",
+                                        "*.gk.australiasoutheast.azmk8s.io",
+                                        "*.microsoftonline.com",
+                                        "dc.services.visualstudio.com"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                },
+                                {
+                                    "name": "flux-requirements",
+                                    "description": "This address is required for Flux <-> Github repository with the desired cluster baseline configuration.",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Https",
+                                            "port": 443
+                                        }
+                                    ],
+                                    "targetFqdns": [
+                                        "github.com"
+                                    ],
+                                    "sourceAddresses": [
+                                        "*" 
+                                    ],
+                                    "ruleConditionType": "ApplicationRuleCondition"
+                                }
+                            ]
+                        }
+                    ]
+                }                
+            ]
+        }
+    }
+}
