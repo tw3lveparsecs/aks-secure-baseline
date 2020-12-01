@@ -1,0 +1,99 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "networkWatcherName": {
+      "value": null
+    },
+    "networkWatcherResourceGroup": {
+      "value": null
+    },
+    "diagnosticStorageAccountName": {
+      "value": null
+    },
+    "diagnosticStorageAccountResourceGroup": {
+      "value": null
+    },
+    "logAnalyticsWorkspaceName": {
+      "value": null
+    },
+    "logAnalyticsSubscriptionID": {
+      "value": null
+    },
+    "logAnalyticsResourceGroup": {
+      "value": null
+    },
+    "nsgName": {
+      "value": "shd-mel-azuredevopssubnet-nsg"
+    },
+    "securityRules": {
+      "value": [
+        {
+          "name": "AZ_Allow_Inbound_AzureMgt_AzureDevopsSubnet_Any_Any",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "168.63.129.161",
+            "destinationAddressPrefix": "10.0.4.0/24",
+            "access": "Allow",
+            "priority": 100,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ_Allow_Inbound_AzureLB_Any_Any_Any",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "AzureLoadBalancer",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 101,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ_Allow_Inbound_AzureDevopsSubnet_AzureDevopsSubnet_Any_Any",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "10.0.4.0/24",
+            "destinationAddressPrefix": "10.0.4.0/24",
+            "access": "Allow",
+            "priority": 102,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ_Allow_Inbound_Any_AzureDevopsSubnet_TCP_443",
+          "properties": {
+            "protocol": "TCP",
+            "sourcePortRange": "*",
+            "destinationPortRange": "443",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "10.0.4.0/24",
+            "access": "Allow",
+            "priority": 103,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ_Deny_Inbound_Any_Any_Any_Any",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Deny",
+            "priority": 999,
+            "direction": "Inbound"
+          }
+        }
+      ]
+    }
+  }
+}

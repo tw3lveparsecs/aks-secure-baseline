@@ -1,0 +1,62 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetName":{
+            "value": "dev-syd-vnw02"
+        },
+        "addressPrefixes": {
+            "value": {
+                "addressSpaces": [
+                    "10.240.0.0/16"
+                ]
+            }
+        },
+        "dhcpOptions": {
+            "value": {
+                // "dnsServers": [
+                //     "10.0.6.4",
+                //     "10.0.6.5",
+                //     "10.1.2.3"
+                // ]
+            }
+        },
+        "subnets": {
+            "value": [
+                {
+                    "name": "AksNodes",
+                    "addressPrefix": "10.240.0.0/22",
+                    "networkSecurityGroup": null,
+                    "routeTable": "npd-mel-aksnodes-udr"
+                },
+                {
+                    "name": "AksServices",
+                    "addressPrefix": "10.240.4.0/24",
+                    "networkSecurityGroup": null,
+                    "routeTable": null
+                }
+            ]
+        },
+        "udr": {
+            "value": [
+                {
+                    "routeTableName": "npd-mel-aksnodes-udr",
+                    "routes": [
+                        {
+                            "name": "to-mskms",
+                            "addressPrefix": "23.102.135.246/32",
+                            "nextHopType": "Internet",
+                            "nextHopIpAddress": null
+                        },
+                        {
+                            "name": "default",
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.0.2.4"
+                        }
+                    ]
+                }
+            ]
+        }        
+    }
+}

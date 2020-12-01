@@ -1,0 +1,102 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "networkWatcherName": {
+      "value": null
+    },
+    "networkWatcherResourceGroup": {
+      "value": null
+    },
+    "diagnosticStorageAccountName": {
+      "value": null
+    },
+    "diagnosticStorageAccountResourceGroup": {
+      "value": null
+    },
+    "logAnalyticsWorkspaceName": {
+      "value": null
+    },
+    "logAnalyticsSubscriptionID": {
+      "value": null
+    },
+    "logAnalyticsResourceGroup": {
+      "value": null
+    },
+    "nsgName": {
+      "value": "shd-mel-azurebastionsubnet-nsg"
+    },
+    "securityRules": {
+      "value": [
+        {
+          "name": "AZ-Allow-Inbound-Any-AzureBastionSubnet-TCP-443",
+          "properties": {
+            "protocol": "Tcp",
+            "sourcePortRange": "*",
+            "sourceAddressPrefix": "*",
+            "destinationPortRange": "443",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 100,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ-Allow-Inbound-GatewayManager-AzureBastionSubnet-TCP-443",
+          "properties": {
+            "protocol": "Tcp",
+            "sourcePortRange": "*",
+            "sourceAddressPrefix": "GatewayManager",
+            "destinationPortRange": "443",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 110,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ-Deny-Inbound-Any-Any-Any-Any",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Deny",
+            "priority": 900,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AZ-Allow-Outbound-Any-AzureCloud-TCP-443",
+          "properties": {
+            "protocol": "Tcp",
+            "sourcePortRange": "*",
+            "sourceAddressPrefix": "*",
+            "destinationPortRange": "443",
+            "destinationAddressPrefix": "AzureCloud",
+            "access": "Allow",
+            "priority": 100,
+            "direction": "Outbound"
+          }
+        },
+        {
+          "name": "AZ-Allow-Outbound-Any-VirtualNetwork-TCP-RDP-SSH",
+          "properties": {
+            "protocol": "Tcp",
+            "sourcePortRange": "*",
+            "sourceAddressPrefix": "*",
+            "destinationPortRanges": [
+              "22",
+              "3389"
+            ],
+            "destinationAddressPrefix": "VirtualNetwork",
+            "access": "Allow",
+            "priority": 110,
+            "direction": "Outbound"
+          }
+        }
+      ]
+    }
+  }
+}
