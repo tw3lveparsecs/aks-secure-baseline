@@ -42,7 +42,7 @@
                     "name": "AksNodes",
                     "addressPrefix": "10.240.0.0/22",
                     "networkSecurityGroup": null,
-                    "routeTable": "dev-mel-aksnodes-udr"
+                    "routeTable": "dev-syd-aksnodes-udr"
                 },
                 {
                     "name": "AksServices",
@@ -55,7 +55,7 @@
         "udr": {
             "value": [
                 {
-                    "routeTableName": "dev-mel-aksnodes-udr",
+                    "routeTableName": "dev-syd-aksnodes-udr",
                     "routes": [
                         {
                             "name": "to-mskms",

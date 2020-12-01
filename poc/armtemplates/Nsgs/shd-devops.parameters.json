@@ -24,7 +24,7 @@
       "value": null
     },
     "nsgName": {
-      "value": "shd-mel-azuredevopssubnet-nsg"
+      "value": "shd-syd-azuredevopssubnet-nsg"
     },
     "securityRules": {
       "value": [

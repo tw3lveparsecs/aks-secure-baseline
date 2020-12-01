@@ -24,7 +24,7 @@
       "value": null
     },
     "nsgName": {
-      "value": "shd-mel-azurebastionsubnet-nsg"
+      "value": "shd-syd-azurebastionsubnet-nsg"
     },
     "securityRules": {
       "value": [

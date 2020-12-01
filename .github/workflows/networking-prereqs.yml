@@ -119,7 +119,7 @@ jobs:
         uses: Azure/cli@v1.0.0
         with:
           inlineScript: |
-            az group create --name ${{ env.DIAGSTORAGERESOURCEGROUP }} --location ${{ env.LOCATION }}
+            #az group create --name ${{ env.DIAGSTORAGERESOURCEGROUP }} --location ${{ env.LOCATION }}
             az deployment group create \
               --resource-group ${{ env.DIAGSTORAGERESOURCEGROUP }} \
               --template-file drop/poc/armtemplates/StorageAccount/azuredeploy.json \
@@ -276,8 +276,8 @@ jobs:
           inlineScript: |
             az deployment group create \
               --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/Vnet/Spoke/azuredeploy.json \
-              --parameters drop/poc/armtemplates/Vnet/Spoke/azuredeploy.parameters.json \
+              --template-file drop/poc/armtemplates/VnetPeering/azuredeploy.json \
+              --parameters drop/poc/armtemplates/VnetPeering/azuredeploy.parameters.json \
               --parameters \
                 vnetName=${{ env.VNETHUB }} \
                 peerVnetName=${{ env.VNETSPOKE }} \
@@ -290,8 +290,8 @@ jobs:
           inlineScript: |
             az deployment group create \
               --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/Vnet/Spoke/azuredeploy.json \
-              --parameters drop/poc/armtemplates/Vnet/Spoke/azuredeploy.parameters.json \
+              --template-file drop/poc/armtemplates/VnetPeering/azuredeploy.json \
+              --parameters drop/poc/armtemplates/VnetPeering/azuredeploy.parameters.json \
               --parameters \
                 vnetName=${{ env.VNETSPOKE }} \
                 peerVnetName=${{ env.VNETHUB }} \

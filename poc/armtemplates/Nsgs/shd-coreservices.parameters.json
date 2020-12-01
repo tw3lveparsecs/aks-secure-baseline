@@ -24,7 +24,7 @@
       "value": null
     },
     "nsgName": {
-      "value": "shd-mel-coreservices-nsg"
+      "value": "shd-syd-coreservices-nsg"
     },
     "securityRules": {
       "value": [

@@ -41,7 +41,7 @@
         {
           "name": "AzureBastionSubnet",
           "addressPrefix": "10.0.0.0/24",
-          "networkSecurityGroup": "shd-mel-azurebastionsubnet-nsg",
+          "networkSecurityGroup": "shd-syd-azurebastionsubnet-nsg",
           "routeTable": null,
           "privateEndpointNetworkPolicies": "Enabled"
         },
@@ -69,8 +69,8 @@
         {
           "name": "AzureDevopsSubnet",
           "addressPrefix": "10.0.4.0/24",
-          "networkSecurityGroup": "shd-mel-azuredevopssubnet-nsg",
-          "routeTable": "shd-mel-azuredevopssubnet-udr",
+          "networkSecurityGroup": "shd-syd-azuredevopssubnet-nsg",
+          "routeTable": "shd-syd-azuredevopssubnet-udr",
           "privateEndpointNetworkPolicies": "Enabled"
         },
         {
@@ -83,15 +83,15 @@
         {
           "name": "CoreServices",
           "addressPrefix": "10.0.6.0/24",
-          "networkSecurityGroup": "shd-mel-coreservices-nsg",
-          "routeTable": "shd-mel-coreservices-udr",
+          "networkSecurityGroup": "shd-syd-coreservices-nsg",
+          "routeTable": "shd-syd-coreservices-udr",
           "privateEndpointNetworkPolicies": "Enabled"
         },
         {
           "name": "PrivateEndpoints",
           "addressPrefix": "10.0.7.0/24",
           "networkSecurityGroup": null,
-          "routeTable": "shd-mel-privateendpoints-udr",
+          "routeTable": "shd-syd-privateendpoints-udr",
           "privateEndpointNetworkPolicies": "Disabled"
         }
       ]
