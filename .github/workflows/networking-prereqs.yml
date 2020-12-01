@@ -115,8 +115,8 @@ jobs:
             az group create --name ${{ env.NETWORKRESOURCEGROUP }} --location ${{ env.LOCATION }}
             az deployment group create \
               --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
-              --template-file "azuredeploy.json" \
-              --parameters azuredeploy.parameters.json \
+              --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
+              --parameters drop/poc/armtemplates/NetworkWatcher/azuredeploy.parameters.json \
               --parameters \
                 location=${{ env.NETWORKWATCHERNAME }} \
                 networkWatcherName=${{ env.LOCATION }}
