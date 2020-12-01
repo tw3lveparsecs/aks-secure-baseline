@@ -1,0 +1,360 @@
+name: PreReqs
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+    - main
+    paths:
+    - poc/armtemplates/LogAnalyticsWorkspace/*
+    - poc/armtemplates/StorageAccount/*
+    - poc/armtemplates/Firewall/*
+    - poc/armtemplates/NetworkWatcher/*
+    - poc/armtemplates/Nsgs/*
+    - poc/armtemplates/RouteTable/*
+    - poc/armtemplates/Vnet/*
+    - poc/armtemplates/VnetPeering/*
+    - poc/armtemplates/KeyVault/*    
+    - .github/variables/prereqs.env
+    - .github/workflows/prereqs.yml
+  push:
+    branches:
+    - poc
+    paths:
+    - poc/armtemplates/LogAnalyticsWorkspace/*
+    - poc/armtemplates/StorageAccount/*
+    - poc/armtemplates/Firewall/*
+    - poc/armtemplates/NetworkWatcher/*
+    - poc/armtemplates/Nsgs/*
+    - poc/armtemplates/RouteTable/*
+    - poc/armtemplates/Vnet/*
+    - poc/armtemplates/VnetPeering/*
+    - poc/armtemplates/KeyVault/*        
+    - .github/variables/prereqs.env
+    - .github/workflows/prereqs.yml
+
+jobs:
+  test:
+    if: ${{ contains(github.ref, 'refs/pull/') }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/Firewall/azuredeploy.json
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/NetworkWatcher/azuredeploy.json
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/Nsgs/azuredeploy.json
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/RouteTable/azuredeploy.json
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/Vnet/azuredeploy.json
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/VNetPeering/azuredeploy.json
+
+  build:
+    if: ${{ github.ref == 'refs/heads/poc' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: drop
+        path: |
+          ./.github/actions/setvars
+          ./.github/variables
+          poc/armtemplates/LogAnalyticsWorkspace/*
+          poc/armtemplates/StorageAccount/*
+          poc/armtemplates/Firewall/*
+          poc/armtemplates/NetworkWatcher/*
+          poc/armtemplates/Nsgs/*
+          poc/armtemplates/RouteTable/*
+          poc/armtemplates/Vnet/*
+          poc/armtemplates/VnetPeering/*
+          poc/armtemplates/KeyVault/*          
+        if-no-files-found: error
+
+  deploy:
+    if: ${{ github.ref == 'refs/heads/poc' }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: drop
+          path: drop
+
+      - name: Configure Environment Variables
+        uses: ./drop/.github/actions/setvars
+        with:
+          varFilePath: ./drop/.github/variables/*
+
+      - name: Login to Azure
+        uses: azure/login@v1.1
+        with:
+          creds: ${{ secrets[env.SECRET] }}
+          #enable-AzPSSession: true
+
+      # - name: Deploy Diagnostic Storage Account
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       #az group create --name ${{ env.DIAGSTORAGERESOURCEGROUP }} --location ${{ env.LOCATION }}
+      #       az deployment group create \
+      #         --resource-group ${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/StorageAccount/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/StorageAccount/azuredeploy.parameters.json \
+      #         --parameters \
+      #           storageName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           accountType=${{ env.DIAGSTORAGETYPE }} \
+      #           accessTier=${{ env.DIAGSTORAGETIER }} \
+      #           kind=${{ env.DIAGSTORAGEKIND }} \
+      #           softDeleteRetentionDays=${{ env.DIAGSTORAGERETENTION }}
+
+      # - name: Deploy Log Analytics
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.LARESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.parameters.json \
+      #         --parameters \
+      #           workspaceName=${{ env.LAWORKSPACENAME }} \
+      #           sku=${{ env.LASKU }} \
+      #           dataRetention=${{ env.LADATARETENTION }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }}
+
+      # - name: Deploy Network Watcher
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az group create --name ${{ env.NETWORKRESOURCEGROUP }} --location ${{ env.LOCATION }}
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/NetworkWatcher/azuredeploy.parameters.json \
+      #         --parameters \
+      #           location=${{ env.LOCATION }} \
+      #           networkWatcherName=${{ env.NETWORKWATCHERNAME }}
+
+      # - name: Deploy Nsg - Bastion
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/Nsgs/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/Nsgs/shd-bastion.parameters.json \
+      #         --parameters \
+      #           networkWatcherName=${{ env.NETWORKWATCHERNAME }} \
+      #           networkWatcherResourceGroup=${{ env.NETWORKWATCHERRESOURCEGROUP }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+
+      # - name: Deploy Nsg - CoreServices
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/Nsgs/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/Nsgs/shd-coreservices.parameters.json \
+      #         --parameters \
+      #           networkWatcherName=${{ env.NETWORKWATCHERNAME }} \
+      #           networkWatcherResourceGroup=${{ env.NETWORKWATCHERRESOURCEGROUP }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+
+      # - name: Deploy Nsg - AzureDevOps
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/Nsgs/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/Nsgs/shd-devops.parameters.json \
+      #         --parameters \
+      #           networkWatcherName=${{ env.NETWORKWATCHERNAME }} \
+      #           networkWatcherResourceGroup=${{ env.NETWORKWATCHERRESOURCEGROUP }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+
+
+      # - name: Deploy UDR - AzureDevOps
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/RouteTable/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/RouteTable/shd-azuredevopssubnet.parameters.json
+
+      # - name: Deploy UDR - CoreServices
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/RouteTable/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/RouteTable/shd-coreservices.parameters.json
+
+      # - name: Deploy UDR - PrivateEndpoints
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/RouteTable/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/RouteTable/shd-privateendpoints.parameters.json
+
+      # - name: Deploy VNet - Hub
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/Vnet/Hub/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/Vnet/Hub/azuredeploy.parameters.json \
+      #         --parameters \
+      #           vnetName=${{ env.VNETHUB }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+
+      # - name: Deploy VNet - Spoke
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/Vnet/Spoke/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/Vnet/Spoke/azuredeploy.parameters.json \
+      #         --parameters \
+      #           vnetName=${{ env.VNETSPOKE }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+
+      # - name: Deploy VNet Peering - Hub to Spoke
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/VnetPeering/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/VnetPeering/azuredeploy.parameters.json \
+      #         --parameters \
+      #           vnetName=${{ env.VNETHUB }} \
+      #           peerVnetName=${{ env.VNETSPOKE }} \
+      #           peerVnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+      #           peerVnetSubscriptionId=${{ env.VNETSPOKESUBID }}
+
+      # - name: Deploy VNet Peering - Spoke to Hub
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/VnetPeering/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/VnetPeering/azuredeploy.parameters.json \
+      #         --parameters \
+      #           vnetName=${{ env.VNETSPOKE }} \
+      #           peerVnetName=${{ env.VNETHUB }} \
+      #           peerVnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+      #           peerVnetSubscriptionId=${{ env.VNETHUBSUBID }}
+
+      # - name: Deploy Firewall
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.KVRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/KeyVault/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/KeyVault/azuredeploy.parameters.json \
+      #         --parameters \
+      #           firewallName=${{ env.FWLNAME }} \
+      #           vnetName=${{ env.VNETHUB }} \
+      #           firewallPolicyName=${{ env.FWLPOLICYNAME }} \
+      #           threatIntelMode=${{ env.FWLTHREATMODE }} \
+      #           inboundPublicIpName=${{ env.FWLINBOUNDPIP }} \
+      #           outboundPublicIpName=${{ env.FWLOUTBOUNDPIP }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }} 
+
+      - name: Deploy Key Vault
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.KVRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/KeyVault/azuredeploy.json \
+              --parameters drop/poc/armtemplates/KeyVault/azuredeploy.parameters.json \
+              --parameters \
+                keyVaultName=${{ env.KVNAME }} \
+                sku=${{ env.KVSKU }} \
+                enabledForDeployment=${{ env.KVDEPLOYMENTENABLED }} \
+                enabledForTemplateDeployment=${{ env.KVTEMPLATEDEPLOYMENT }} \
+                enabledForDiskEncryption=${{ env.KVDISKENCRYPTION }} \
+                enableSoftDelete=${{ env.KVSOFTDELETE }} \
+                softDeleteRetentionInDays=${{ env.KVSOFTDELETERETENTION }} \
+                enablePurgeProtection=${{ env.KVPURGEPROTECTION }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                                                                                                                
+
+      - name: Deploy Managed Identities
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az identity create --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }}
+            az group create --name ${{ env.AKSRESOURCEGROUP }} --location ${{ env.LOCATION }}
+            az identity create --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }}   
+            
+            UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[clientId]" --output tsv)
+            az keyvault set-policy --name $kv --spn $UMIAPPGWID --certificate-permissions get --secret-permissions get 
+            
+            UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[clientId]" --output tsv)
+            az keyvault set-policy --name $kv --spn $UMIAKSICID --certificate-permissions get --secret-permissions get             

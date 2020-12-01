@@ -1,0 +1,191 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "Key Vault Name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Key Vault Location."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "allowedValues": [
+                "Standard",
+                "Premium"
+            ],
+            "metadata": {
+                "description": "Key Vault SKU."
+            }
+        },
+        "enabledForDeployment": {
+            "type": "bool",
+            "metadata": {
+                "description": "Azure Virtual Machines are permitted to retrieve certificates stored as secrets from the key vault."
+            }
+        },
+        "enabledForTemplateDeployment": {
+            "type": "bool",
+            "metadata": {
+                "description": "Azure Resource Manager is permitted to retrieve secrets from the key vault."
+            }
+        },
+        "enabledForDiskEncryption": {
+            "type": "bool",
+            "metadata": {
+                "description": "Azure Disk Encryption is permitted to retrieve secrets from the vault and unwrap keys."
+            }
+        },
+        "enableSoftDelete": {
+            "type": "bool",
+            "metadata": {
+                "description": "Soft delete enabled."
+            }
+        },
+        "softDeleteRetentionInDays": {
+            "type": "int",
+            "metadata": {
+                "description": "Soft delete retention period."
+            }
+        },
+        "enablePurgeProtection": {
+            "type": "bool",
+            "metadata": {
+                "description": "Purge protection enabled."
+            }
+        },
+        "diagnosticStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostic storage accounnt name."
+            }
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostics storage account resource group."
+            }
+        },
+        "logAnalyticsWorkspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace name."
+            }
+        },
+        "logAnalyticsSubscriptionID": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics subscription Id."
+            }
+        },
+        "logAnalyticsResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace resource group."
+            }
+        },
+        "accessPolicies": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing key vault access policies."
+            }
+        }
+    },
+    "variables": {
+        "diagnosticRetentionInDays": 30
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('keyVaultName')]",
+            "location": "[parameters('location')]",
+            "type": "Microsoft.KeyVault/vaults",
+            "properties": {
+                "enabledForDeployment": "[parameters('enabledForDeployment')]",
+                "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+                "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
+                "copy": [
+                    {
+                        "name": "accessPolicies",
+                        "count": "[length(parameters('accessPolicies'))]",
+                        "input": {
+                            "objectId": "[parameters('accessPolicies')[copyIndex('accessPolicies')].objectId]",
+                            "tenantId": "[subscription().tenantId]",
+                            "permissions": {
+                                "keys": "[parameters('accessPolicies')[copyIndex('accessPolicies')].keys]",
+                                "secrets": "[parameters('accessPolicies')[copyIndex('accessPolicies')].secrets]",
+                                "certificates": "[parameters('accessPolicies')[copyIndex('accessPolicies')].certificates]"
+
+                            }
+                        }
+                    }
+                ],
+                "tenantId": "[subscription().tenantid]",
+                "sku": {
+                    "name": "[parameters('sku')]",
+                    "family": "A"
+                },
+                "enableSoftDelete": "[parameters('enableSoftDelete')]",
+                "softDeleteRetentionInDays": "[parameters('softDeleteRetentionInDays')]",
+                "enablePurgeProtection": "[parameters('enablePurgeProtection')]",
+                "networkAcls": {
+                    "defaultAction": "deny",
+                    "bypass": "AzureServices"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/providers/diagnosticSettings",
+            "name": "[concat(parameters('keyVaultName'), '/Microsoft.Insights/', parameters('keyVaultName'), '-dgs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "name": "[concat(parameters('keyVaultName'), '-dgs')]",
+                "storageAccountId": "[resourceId(parameters('diagnosticStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                "workspaceId": "[resourceId(parameters('logAnalyticsSubscriptionID'), parameters('logAnalyticsResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                "logs": [
+                    {
+                        "category": "AuditEvent",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ],
+                "metrics": [
+                    {
+                        "category": "AllMetrics",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "enabled": true,
+                            "days": "[variables('diagnosticRetentionInDays')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/providers/locks",
+            "name": "[concat(parameters('keyVaultName'), '/Microsoft.Authorization/', parameters('keyVaultName'), '-lck')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "apiVersion": "2017-04-01",
+            "properties": {
+                "level": "CannotDelete"
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

@@ -1,0 +1,90 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName": {
+            "value": null
+        },
+        "sku": {
+            "value": null
+        },
+        "enabledForDeployment": {
+            "value": null
+        },
+        "enabledForTemplateDeployment": {
+            "value": null
+        },
+        "enabledForDiskEncryption": {
+            "value": null
+        },
+        "enableSoftDelete": {
+            "value": null
+        },
+        "softDeleteRetentionInDays": {
+            "value": null
+        },
+        "enablePurgeProtection": {
+            "value": null
+        },
+        "diagnosticStorageAccountName": {
+            "value": null
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "value": null
+        },
+        "logAnalyticsWorkspaceName": {
+            "value": null
+        },
+        "logAnalyticsSubscriptionID": {
+            "value": null
+        },
+        "logAnalyticsResourceGroup": {
+            "value": null
+        },
+        "accessPolicies": {
+            "value": [
+                /* Example below
+                {
+                    "objectId": "abc123de-fg45-6789-9hik1-abc123defg",
+                    "keys": [
+                        "Get",
+                        "List",
+                        "Update",
+                        "Create",
+                        "Import",
+                        "Delete",
+                        "Recover",
+                        "Backup",
+                        "Restore"
+                    ],
+                    "secrets": [
+                        "Get",
+                        "List",
+                        "Set",
+                        "Delete",
+                        "Recover",
+                        "Backup",
+                        "Restore"
+                    ],
+                    "certificates": [
+                        "Get",
+                        "List",
+                        "Update",
+                        "Create",
+                        "Import",
+                        "Delete",
+                        "Recover",
+                        "Backup",
+                        "Restore",
+                        "ManageContacts",
+                        "ManageIssuers",
+                        "GetIssuers",
+                        "ListIssuers",
+                        "SetIssuers",
+                        "DeleteIssuers"
+                    ]
+                }*/
+            ]
+        }
+    }
+}
