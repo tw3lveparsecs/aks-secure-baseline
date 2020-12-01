@@ -168,6 +168,7 @@ jobs:
               --template-file drop/poc/armtemplates/Nsgs/azuredeploy.json \
               --parameters drop/poc/armtemplates/Nsgs/shd-bastion.parameters.json \
               --parameters \
+                networkWatcherName=${{ env.NETWORKWATCHERNAME }} \
                 networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
                 diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
@@ -184,13 +185,14 @@ jobs:
               --template-file drop/poc/armtemplates/Nsgs/azuredeploy.json \
               --parameters drop/poc/armtemplates/Nsgs/shd-coreservices.parameters.json \
               --parameters \
+                networkWatcherName=${{ env.NETWORKWATCHERNAME }} \
                 networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
                 diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
                 logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
                 logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
-                
+
       - name: Deploy Nsg - AzureDevOps
         uses: Azure/cli@v1.0.0
         with:
@@ -200,12 +202,13 @@ jobs:
               --template-file drop/poc/armtemplates/Nsgs/azuredeploy.json \
               --parameters drop/poc/armtemplates/Nsgs/shd-devops.parameters.json \
               --parameters \
+                networkWatcherName=${{ env.NETWORKWATCHERNAME }} \
                 networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
                 diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
                 logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
-                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
 
 
       - name: Deploy UDR - AzureDevOps
@@ -233,4 +236,20 @@ jobs:
             az deployment group create \
               --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
               --template-file drop/poc/armtemplates/RouteTable/azuredeploy.json \
-              --parameters drop/poc/armtemplates/RouteTable/shd-privateendpoints.parameters.json                            
+              --parameters drop/poc/armtemplates/RouteTable/shd-privateendpoints.parameters.json
+
+      - name: Deploy VNet - Hub
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/Vnet/Hub/azuredeploy.json \
+              --parameters drop/poc/armtemplates/Vnet/Hub/azuredeploy.parameters.json \
+              --parameters \
+                vnetName=${{ env.VNETHUB }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
