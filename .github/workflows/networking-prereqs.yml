@@ -112,9 +112,10 @@ jobs:
         with:
           inlineScript: |
             az group create --name ${{ env.NETWORKRESOURCEGROUP }} --location ${{ env.LOCATION }}
-            az deployment group create --resource-group ${{ env.RESOURCE_GROUP }} \
+            az deployment group create \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
               --template-file "azuredeploy.json" \
               --parameters azuredeploy.parameters.json \
               --parameters \
-                  location=${{ env.NETWORKWATCHERNAME }} \
-                  networkWatcherName=${{ env.LOCATION }}
+                location=${{ env.NETWORKWATCHERNAME }} \
+                networkWatcherName=${{ env.LOCATION }}
