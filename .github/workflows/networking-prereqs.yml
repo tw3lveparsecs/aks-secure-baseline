@@ -18,7 +18,7 @@ on:
     - .github/workflows/networking-prereqs.yml
   push:
     branches:
-    - main
+    - poc
     paths:
     - poc/armtemplates/LogAnalytics/*
     - poc/armtemplates/StorageAccount/*      
@@ -128,7 +128,7 @@ jobs:
                 storageName=devsydajdev1diagsstg01 \
                 accountType=Standard_LRS \
                 accessTier=Hot \
-                kind=StorageV2 \    
+                kind=StorageV2 \
                 softDeleteRetentionDays=30         
 
       - name: Deploy Log Analytics       
