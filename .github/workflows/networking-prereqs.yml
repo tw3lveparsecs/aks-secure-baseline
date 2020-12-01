@@ -27,7 +27,7 @@ on:
 
 jobs:
   test:
-    if: ${{ contains(github.ref, 'refs/pull/') }}
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repo
