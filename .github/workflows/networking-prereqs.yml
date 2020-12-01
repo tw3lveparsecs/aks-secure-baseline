@@ -1,0 +1,120 @@
+name: Networking-PreReqs
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+    - master
+    paths:
+    - poc/armtemplates/Firewall/*
+    - poc/armtemplates/NetworkWatcher/*
+    - poc/armtemplates/Nsgs/*
+    - poc/armtemplates/RouteTable/*
+    - poc/armtemplates/Vnet/*
+    - poc/armtemplates/VNetPeering/*
+    - .github/variables/networkingprereqs.env
+  push:
+    branches:
+    - master
+    paths:
+    - poc/armtemplates/Firewall/*
+    - poc/armtemplates/NetworkWatcher/*
+    - poc/armtemplates/Nsgs/*
+    - poc/armtemplates/RouteTable/*
+    - poc/armtemplates/Vnet/*
+    - poc/armtemplates/VNetPeering/*
+    - .github/variables/networkingprereqs.env
+
+jobs:
+  test:
+    if: ${{ contains(github.ref, 'refs/pull/') }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/Firewall/azuredeploy.json
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/NetworkWatcher/azuredeploy.json
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/Nsgs/azuredeploy.json
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/RouteTable/azuredeploy.json
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/Vnet/azuredeploy.json      
+
+    - name: Test ARM template
+      uses: ./.github/actions/armttk
+      with:
+        templateFile: poc/armtemplates/VNetPeering/azuredeploy.json    
+
+  build:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: drop
+        path: |
+          ./.github/actions/setvars
+          ./.github/variables
+          poc/armtemplates/Firewall/*
+          poc/armtemplates/NetworkWatcher/*
+          poc/armtemplates/Nsgs/*
+          poc/armtemplates/RouteTable/*
+          poc/armtemplates/Vnet/*
+          poc/armtemplates/VNetPeering/*          
+        if-no-files-found: error
+
+  deploy:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: drop
+          path: drop
+
+      - name: Configure Environment Variables
+        uses: ./drop/.github/actions/setvars
+        with:
+          varFilePath: ./drop/.github/variables/*
+
+      - name: Login to Azure
+        uses: azure/login@v1.1
+        with:
+          creds: ${{ secrets[env.SECRET] }}
+          #enable-AzPSSession: true
+
+      - name: Deploy Network Watcher        
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az group create --name ${{ env.NETWORKRESOURCEGROUP }} --location ${{ env.LOCATION }}
+            az deployment group create --resource-group ${{ env.RESOURCE_GROUP }} \
+              --template-file "azuredeploy.json" \
+              --parameters azuredeploy.parameters.json
+              --parameters \
+                  location=${{ env.NETWORKWATCHERNAME }} \
+                  networkWatcherName=${{ env.LOCATION }}
