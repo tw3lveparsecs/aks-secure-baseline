@@ -354,7 +354,7 @@ jobs:
             az identity create --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }}   
             
             UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[clientId]" --output tsv)
-            az keyvault set-policy --name $kv --spn $UMIAPPGWID --certificate-permissions get --secret-permissions get 
+            az keyvault set-policy --name ${{ env.KVNAME }} --spn $UMIAPPGWID --certificate-permissions get --secret-permissions get 
             
             UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[clientId]" --output tsv)
-            az keyvault set-policy --name $kv --spn $UMIAKSICID --certificate-permissions get --secret-permissions get             
+            az keyvault set-policy --name ${{ env.KVNAME }} --spn $UMIAKSICID --certificate-permissions get --secret-permissions get             
