@@ -2,8 +2,23 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "vnetName":{
-            "value": "dev-syd-vnw02"
+        "vnetName": {
+            "value": null
+        },
+        "diagnosticStorageAccountName": {
+            "value": null
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "value": null
+        },
+        "logAnalyticsWorkspaceName": {
+            "value": null
+        },
+        "logAnalyticsSubscriptionID": {
+            "value": null
+        },
+        "logAnalyticsResourceGroup": {
+            "value": null
         },
         "addressPrefixes": {
             "value": {
@@ -27,7 +42,7 @@
                     "name": "AksNodes",
                     "addressPrefix": "10.240.0.0/22",
                     "networkSecurityGroup": null,
-                    "routeTable": "npd-mel-aksnodes-udr"
+                    "routeTable": "dev-mel-aksnodes-udr"
                 },
                 {
                     "name": "AksServices",
@@ -40,7 +55,7 @@
         "udr": {
             "value": [
                 {
-                    "routeTableName": "npd-mel-aksnodes-udr",
+                    "routeTableName": "dev-mel-aksnodes-udr",
                     "routes": [
                         {
                             "name": "to-mskms",
@@ -57,6 +72,6 @@
                     ]
                 }
             ]
-        }        
+        }
     }
 }

@@ -169,7 +169,7 @@ jobs:
               --parameters drop/poc/armtemplates/Nsgs/shd-bastion.parameters.json \
               --parameters \
                 networkWatcherName=${{ env.NETWORKWATCHERNAME }} \
-                networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                networkWatcherResourceGroup=${{ env.NETWORKWATCHERRESOURCEGROUP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
                 diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
@@ -186,7 +186,7 @@ jobs:
               --parameters drop/poc/armtemplates/Nsgs/shd-coreservices.parameters.json \
               --parameters \
                 networkWatcherName=${{ env.NETWORKWATCHERNAME }} \
-                networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                networkWatcherResourceGroup=${{ env.NETWORKWATCHERRESOURCEGROUP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
                 diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
@@ -203,7 +203,7 @@ jobs:
               --parameters drop/poc/armtemplates/Nsgs/shd-devops.parameters.json \
               --parameters \
                 networkWatcherName=${{ env.NETWORKWATCHERNAME }} \
-                networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                networkWatcherResourceGroup=${{ env.NETWORKWATCHERRESOURCEGROUP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
                 diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
@@ -253,3 +253,35 @@ jobs:
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
                 logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
                 logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+
+      - name: Deploy VNet - Spoke
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/Vnet/Spoke/azuredeploy.json \
+              --parameters drop/poc/armtemplates/Vnet/Spoke/azuredeploy.parameters.json \
+              --parameters \
+                vnetName=${{ env.VNETSPOKE }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}       
+
+      - name: Deploy VNet Peering - Hub to Spoke
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/Vnet/Spoke/azuredeploy.json \
+              --parameters drop/poc/armtemplates/Vnet/Spoke/azuredeploy.parameters.json \
+              --parameters \
+                vnetName=${{ env.VNETSPOKE }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                          
