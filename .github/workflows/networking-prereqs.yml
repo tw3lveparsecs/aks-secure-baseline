@@ -165,8 +165,8 @@ jobs:
           inlineScript: |
             az deployment group create \
               --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
-              --parameters drop/poc/armtemplates/NetworkWatcher/shd-bastion.parameters.json \
+              --template-file drop/poc/armtemplates/Nsgs/azuredeploy.json \
+              --parameters drop/poc/armtemplates/Nsgs/shd-bastion.parameters.json \
               --parameters \
                 networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
@@ -181,8 +181,8 @@ jobs:
           inlineScript: |
             az deployment group create \
               --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
-              --parameters drop/poc/armtemplates/NetworkWatcher/shd-coreservices.parameters.json \
+              --template-file drop/poc/armtemplates/Nsgs/azuredeploy.json \
+              --parameters drop/poc/armtemplates/Nsgs/shd-coreservices.parameters.json \
               --parameters \
                 networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
@@ -197,8 +197,8 @@ jobs:
           inlineScript: |
             az deployment group create \
               --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/NetworkWatcher/azuredeploy.json \
-              --parameters drop/poc/armtemplates/NetworkWatcher/shd-devops.parameters.json \
+              --template-file drop/poc/armtemplates/Nsgs/azuredeploy.json \
+              --parameters drop/poc/armtemplates/Nsgs/shd-devops.parameters.json \
               --parameters \
                 networkWatcherResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
@@ -206,3 +206,31 @@ jobs:
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
                 logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
                 logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                
+
+
+      - name: Deploy UDR - AzureDevOps
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/RouteTable/azuredeploy.json \
+              --parameters drop/poc/armtemplates/RouteTable/shd-azuredevopssubnet.parameters.json
+
+      - name: Deploy UDR - CoreServices
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/RouteTable/azuredeploy.json \
+              --parameters drop/poc/armtemplates/RouteTable/shd-coreservices.parameters.json
+
+      - name: Deploy UDR - PrivateEndpoints
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/RouteTable/azuredeploy.json \
+              --parameters drop/poc/armtemplates/RouteTable/shd-privateendpoints.parameters.json                            
