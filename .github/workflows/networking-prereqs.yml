@@ -268,7 +268,7 @@ jobs:
                 diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
                 logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
-                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}       
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
 
       - name: Deploy VNet Peering - Hub to Spoke
         uses: Azure/cli@v1.0.0
@@ -279,9 +279,42 @@ jobs:
               --template-file drop/poc/armtemplates/Vnet/Spoke/azuredeploy.json \
               --parameters drop/poc/armtemplates/Vnet/Spoke/azuredeploy.parameters.json \
               --parameters \
+                vnetName=${{ env.VNETHUB }} \
+                peerVnetName=${{ env.VNETSPOKE }} \
+                peerVnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                peerVnetSubscriptionId=${{ env.VNETSPOKESUBID }}
+
+      - name: Deploy VNet Peering - Spoke to Hub
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/Vnet/Spoke/azuredeploy.json \
+              --parameters drop/poc/armtemplates/Vnet/Spoke/azuredeploy.parameters.json \
+              --parameters \
                 vnetName=${{ env.VNETSPOKE }} \
+                peerVnetName=${{ env.VNETHUB }} \
+                peerVnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                peerVnetSubscriptionId=${{ env.VNETHUBSUBID }}
+
+      - name: Deploy Firewall
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/Firewall/azuredeploy.json \
+              --parameters drop/poc/armtemplates/Firewall/azuredeploy.parameters.json \
+              --parameters \
+                firewallName=${{ env.FWLNAME }} \
+                vnetName=${{ env.VNETHUB }} \
+                firewallPolicyName=${{ env.FWLPOLICYNAME }} \
+                threatIntelMode=${{ env.FWLTHREATMODE }} \
+                inboundPublicIpName=${{ env.FWLINBOUNDPIP }} \
+                outboundPublicIpName=${{ env.FWLOUTBOUNDPIP }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
                 diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
                 logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
-                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                          
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                                                                                             
