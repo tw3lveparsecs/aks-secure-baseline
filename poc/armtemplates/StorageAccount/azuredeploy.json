@@ -1,0 +1,116 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageName": {
+            "type": "string",
+            "metadata": {
+                "description": "Storage Account name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Storage Account location."
+            }
+        },
+        "accountType": {
+            "type": "string",
+            "metadata": {
+                "description": "Type of Storage Account, e.g. Standard/Premium, LRS/GRS, etc."
+            },
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Premium_LRS"
+            ]
+        },
+        "accessTier": {
+            "type": "string",
+            "allowedValues": [
+                "Hot",
+                "Cool"
+            ],
+            "metadata": {
+                "description": "The account Access Tier, Hot for frequently accessed data or Cool for infreqently accessed data."
+            }
+        },
+        "kind": {
+            "type": "string",
+            "allowedValues": [
+                "Storage",
+                "BlobStorage",
+                "StorageV2"
+            ],
+            "metadata": {
+                "description": "Storage account kind, e.g. General Purpose v1/v2 or BlobStorage."
+            }
+        },
+        "softDeleteRetentionDays": {
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 365,
+            "metadata": {
+                "description": "Amount of days the soft deleted data is stored and available for recovery."
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('storagename')]",
+            "location": "[parameters('location')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "kind": "[parameters('kind')]",
+            "sku": {
+                "name": "[parameters('accountType')]"
+            },
+            "properties": {
+                "accessTier": "[parameters('accessTier')]",
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        },
+                        "file": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/providers/locks",
+            "name": "[concat(parameters('storagename'), '/Microsoft.Authorization/', parameters('storagename'), '-lck')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storagename'))]"
+            ],
+            "apiVersion": "2017-04-01",
+            "properties": {
+                "level": "CannotDelete"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageaccounts/blobServices",
+            "name": "[concat(parameters('storagename'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storagename'))]"
+            ],
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "deleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": "[parameters('softDeleteRetentionDays')]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
