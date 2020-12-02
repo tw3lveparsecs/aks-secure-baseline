@@ -20,7 +20,7 @@
             ]
         },
         "privateDnsZone": {
-            "value": "privatelink-azurecr-io"
+            "value": "privatelink.azurecr.io"
         },
         "privateDnsResourceGroup": {
             "value": null
