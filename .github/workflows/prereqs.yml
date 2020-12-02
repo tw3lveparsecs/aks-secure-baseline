@@ -322,28 +322,28 @@ jobs:
       #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
       #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }} 
 
-      - name: Deploy Key Vault
-        uses: Azure/cli@v1.0.0
-        with:
-          inlineScript: |
-            az deployment group create \
-              --resource-group ${{ env.KVRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/KeyVault/azuredeploy.json \
-              --parameters drop/poc/armtemplates/KeyVault/azuredeploy.parameters.json \
-              --parameters \
-                keyVaultName=${{ env.KVNAME }} \
-                sku=${{ env.KVSKU }} \
-                enabledForDeployment=${{ env.KVDEPLOYMENTENABLED }} \
-                enabledForTemplateDeployment=${{ env.KVTEMPLATEDEPLOYMENT }} \
-                enabledForDiskEncryption=${{ env.KVDISKENCRYPTION }} \
-                enableSoftDelete=${{ env.KVSOFTDELETE }} \
-                softDeleteRetentionInDays=${{ env.KVSOFTDELETERETENTION }} \
-                enablePurgeProtection=${{ env.KVPURGEPROTECTION }} \
-                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
-                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
-                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
-                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
-                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                                                                                                                
+      # - name: Deploy Key Vault
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.KVRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/KeyVault/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/KeyVault/azuredeploy.parameters.json \
+      #         --parameters \
+      #           keyVaultName=${{ env.KVNAME }} \
+      #           sku=${{ env.KVSKU }} \
+      #           enabledForDeployment=${{ env.KVDEPLOYMENTENABLED }} \
+      #           enabledForTemplateDeployment=${{ env.KVTEMPLATEDEPLOYMENT }} \
+      #           enabledForDiskEncryption=${{ env.KVDISKENCRYPTION }} \
+      #           enableSoftDelete=${{ env.KVSOFTDELETE }} \
+      #           softDeleteRetentionInDays=${{ env.KVSOFTDELETERETENTION }} \
+      #           enablePurgeProtection=${{ env.KVPURGEPROTECTION }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                                                                                                                
 
       - name: Deploy Managed Identities
         uses: Azure/cli@v1.0.0
@@ -353,8 +353,8 @@ jobs:
             az group create --name ${{ env.AKSRESOURCEGROUP }} --location ${{ env.LOCATION }}
             az identity create --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }}   
             
-            UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[clientId]" --output tsv)
+            UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[principalId]" --output tsv)
             az keyvault set-policy --name ${{ env.KVNAME }} --spn $UMIAPPGWID --certificate-permissions get --secret-permissions get 
             
-            UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[clientId]" --output tsv)
+            UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[principalId]" --output tsv)
             az keyvault set-policy --name ${{ env.KVNAME }} --spn $UMIAKSICID --certificate-permissions get --secret-permissions get             
