@@ -5,39 +5,13 @@ on:
   pull_request:
     branches:
     - main
-    paths:
-    - poc/armtemplates/LogAnalyticsWorkspace/*
-    - poc/armtemplates/StorageAccount/*
-    - poc/armtemplates/Firewall/*
-    - poc/armtemplates/NetworkWatcher/*
-    - poc/armtemplates/Nsgs/*
-    - poc/armtemplates/RouteTable/*
-    - poc/armtemplates/Vnet/*
-    - poc/armtemplates/VnetPeering/*
-    - poc/armtemplates/KeyVault/*
-    - poc/armtemplates/ApplicationGateway/*
-    - poc/armtemplates/PrivateDnsZones/*
-    - poc/armtemplates/PrivateEndpoint/*
-    - poc/armtemplates/ACR/*    
+    paths: 
     - .github/variables/prereqs.env
     - .github/workflows/generate-certs.yml
   push:
     branches:
     - poc
-    paths:
-    - poc/armtemplates/LogAnalyticsWorkspace/*
-    - poc/armtemplates/StorageAccount/*
-    - poc/armtemplates/Firewall/*
-    - poc/armtemplates/NetworkWatcher/*
-    - poc/armtemplates/Nsgs/*
-    - poc/armtemplates/RouteTable/*
-    - poc/armtemplates/Vnet/*
-    - poc/armtemplates/VnetPeering/*
-    - poc/armtemplates/KeyVault/*
-    - poc/armtemplates/ApplicationGateway/*
-    - poc/armtemplates/PrivateDnsZones/*
-    - poc/armtemplates/PrivateEndpoint/*
-    - poc/armtemplates/ACR/*    
+    paths: 
     - .github/variables/prereqs.env
     - .github/workflows/generate-certs.yml
 
@@ -92,20 +66,7 @@ jobs:
         name: drop
         path: |
           ./.github/actions/setvars
-          ./.github/variables
-          poc/armtemplates/LogAnalyticsWorkspace/*
-          poc/armtemplates/StorageAccount/*
-          poc/armtemplates/Firewall/*
-          poc/armtemplates/NetworkWatcher/*
-          poc/armtemplates/Nsgs/*
-          poc/armtemplates/RouteTable/*
-          poc/armtemplates/Vnet/*
-          poc/armtemplates/VnetPeering/*
-          poc/armtemplates/KeyVault/*
-          poc/armtemplates/ApplicationGateway/*
-          poc/armtemplates/PrivateDnsZones/*
-          poc/armtemplates/PrivateEndpoint/*
-          poc/armtemplates/ACR/*          
+          ./.github/variables       
         if-no-files-found: error
 
   deploy:
@@ -141,3 +102,7 @@ jobs:
             
             openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out traefik-ingress-internal-aks-ingress-contoso-com-tls.crt -keyout traefik-ingress-internal-aks-ingress-contoso-com-tls.key -subj "/CN=*.aks-ingress.contoso.com/O=Contoso Aks Ingress"
             export AKS_INGRESS_CONTROLLER_CERTIFICATE_BASE64=$(cat traefik-ingress-internal-aks-ingress-contoso-com-tls.crt | base64 | tr -d '\n')
+            rm appgw.pfx
+            rm appgw.crt
+            rm raefik-ingress-internal-aks-ingress-contoso-com-tls.crt
+            rm traefik-ingress-internal-aks-ingress-contoso-com-tls.key
