@@ -16,6 +16,8 @@ on:
     - poc/armtemplates/VnetPeering/*
     - poc/armtemplates/KeyVault/*
     - poc/armtemplates/ApplicationGateway/*
+    - poc/armtemplates/PrivateDnsZones/*
+    - poc/armtemplates/PrivateEndpoint/*        
     - .github/variables/prereqs.env
     - .github/workflows/prereqs.yml
   push:
@@ -32,6 +34,8 @@ on:
     - poc/armtemplates/VnetPeering/*
     - poc/armtemplates/KeyVault/*
     - poc/armtemplates/ApplicationGateway/*
+    - poc/armtemplates/PrivateDnsZones/*
+    - poc/armtemplates/PrivateEndpoint/*         
     - .github/variables/prereqs.env
     - .github/workflows/prereqs.yml
 
@@ -97,6 +101,8 @@ jobs:
           poc/armtemplates/VnetPeering/*
           poc/armtemplates/KeyVault/*
           poc/armtemplates/ApplicationGateway/*
+          poc/armtemplates/PrivateDnsZones/*
+          poc/armtemplates/PrivateEndpoint/*               
         if-no-files-found: error
 
   deploy:
