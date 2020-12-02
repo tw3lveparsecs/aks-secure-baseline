@@ -44,6 +44,12 @@
             "metadata": {
                 "description": "Private dns zone to use to connect to resource."
             }
+        },
+        "privateDnsResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Private dns zone resource group."
+            }
         }
     },
     "variables": {
@@ -84,7 +90,7 @@
                     {
                         "name": "config1",
                         "properties": {
-                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZone'))]"
+                            "privateDnsZoneId": "[resourceId(parameters('privateDnsResourceGroup'), 'Microsoft.Network/privateDnsZones', parameters('privateDnsZone'))]"
                         }
                     }
                 ]

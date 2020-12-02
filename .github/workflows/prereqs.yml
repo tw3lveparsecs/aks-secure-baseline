@@ -419,4 +419,5 @@ jobs:
                 virtualNetworkName=${{ env.VNETHUB }} \
                 vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
                 subnetName=${{ env.SUBNETPEP }} \
-                privateEndpointResourceId=$KVID
+                privateEndpointResourceId=$KVID \
+                privateDnsResourceGroup=${{ env.NETWORKRESOURCEGROUP }}

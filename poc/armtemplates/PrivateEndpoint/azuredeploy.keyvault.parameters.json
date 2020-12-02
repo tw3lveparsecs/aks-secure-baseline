@@ -21,6 +21,9 @@
         },
         "privateDnsZone": {
             "value": "privatelink.vaultcore.azure.net"
+        },
+        "privateDnsResourceGroup": {
+            "value": null
         }
     }
 }
