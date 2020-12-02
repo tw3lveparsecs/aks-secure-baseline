@@ -5,7 +5,7 @@ on:
   pull_request:
     branches:
     - main
-    paths:   
+    paths:
     - .github/variables/prereqs.env
     - .github/workflows/generate-certs.yml
   push:
@@ -29,7 +29,7 @@ jobs:
         name: drop
         path: |
           ./.github/actions/setvars
-          ./.github/variables       
+          ./.github/variables
         if-no-files-found: error
 
   deploy:
