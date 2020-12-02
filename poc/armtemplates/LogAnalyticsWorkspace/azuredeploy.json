@@ -52,7 +52,14 @@
     },
     "variables": {
         "solutions": [
-            "ContainerInsights"
+            "ContainerInsights",
+            "SQLVulnerabilityAssessment",
+            "VMInsights",
+            "KeyVaultAnalytics",
+            "AzureSQLAnalytics",
+            "Containers",
+            "SQLAssessment",
+            "Updates"
         ],
         "diagnosticRetentionInDays": 30
     },
@@ -74,7 +81,7 @@
         },
         {
             "apiVersion": "2020-08-01",
-            "name": "[concat(parameters('workspaceName'), '/PrometheusQuery1')]",            
+            "name": "[concat(parameters('workspaceName'), '/PrometheusQuery1')]",
             "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
             "dependsOn": [
                 "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
@@ -159,7 +166,7 @@
                 "promotionCode": "",
                 "publisher": "Microsoft"
             }
-        },        
+        },
         {
             "apiVersion": "2020-08-01",
             "type": "Microsoft.OperationalInsights/workspaces/dataSources",

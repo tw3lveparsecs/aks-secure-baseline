@@ -146,20 +146,36 @@ jobs:
       #           kind=${{ env.DIAGSTORAGEKIND }} \
       #           softDeleteRetentionDays=${{ env.DIAGSTORAGERETENTION }}
 
-      - name: Deploy Log Analytics
+      # - name: Deploy Log Analytics - CoreServices
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.LACSRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.parameters.json \
+      #         --parameters \
+      #           workspaceName=${{ env.LACSWORKSPACENAME }} \
+      #           sku=${{ env.LASKU }} \
+      #           dataRetention=${{ env.LADATARETENTION }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }}
+
+      - name: Deploy Log Analytics - AKS
         uses: Azure/cli@v1.0.0
         with:
           inlineScript: |
+            #az group create --name ${{ env.LAAKSRESOURCEGROUP }} --location ${{ env.LOCATION }}          
             az deployment group create \
-              --resource-group ${{ env.LARESOURCEGROUP }} \
+              --resource-group ${{ env.LAAKSRESOURCEGROUP }} \
               --template-file drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.json \
               --parameters drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.parameters.json \
               --parameters \
-                workspaceName=${{ env.LAWORKSPACENAME }} \
+                workspaceName=${{ env.LAAKSWORKSPACENAME }} \
                 sku=${{ env.LASKU }} \
                 dataRetention=${{ env.LADATARETENTION }} \
                 diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
-                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }}
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }}                
 
       # - name: Deploy Network Watcher
       #   uses: Azure/cli@v1.0.0
