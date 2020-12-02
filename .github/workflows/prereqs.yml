@@ -348,19 +348,19 @@ jobs:
       #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
       #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
 
-      # - name: Deploy Managed Identities
-      #   uses: Azure/cli@v1.0.0
-      #   with:
-      #     inlineScript: |
-      #       az identity create --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }}
-      #       az group create --name ${{ env.AKSRESOURCEGROUP }} --location ${{ env.LOCATION }}
-      #       az identity create --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }}
+      - name: Deploy Managed Identities
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az identity create --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }}
+            az group create --name ${{ env.AKSRESOURCEGROUP }} --location ${{ env.LOCATION }}
+            az identity create --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }}
 
-      #       UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[principalId]" --output tsv)
-      #       az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAPPGWID --certificate-permissions get --secret-permissions get
+            UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[principalId]" --output tsv)
+            az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAPPGWID --certificate-permissions get --secret-permissions get
 
-      #       UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[principalId]" --output tsv)
-      #       az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAKSICID --certificate-permissions get --secret-permissions get
+            UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[principalId]" --output tsv)
+            az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAKSICID --certificate-permissions get --secret-permissions get
 
       - name: Deploy Application Gateway
         uses: Azure/cli@v1.0.0
