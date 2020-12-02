@@ -444,3 +444,19 @@ jobs:
                 logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
                 logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
                 logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                                
+
+      - name: Deploy PrivateEndpoint - ACR
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            ACRID=$(az keyvault show --name ${{ env.ACRNAME }} --resource-group ${{ env.ACRRESOURCEGROUP }} --query "[id]" --output tsv)
+            az deployment group create \
+              --resource-group ${{ env.ACRRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/ACR/azuredeploy.json \
+              --parameters drop/poc/armtemplates/ACR/azuredeploy.acr.parameters.json \
+              --parameters \
+                virtualNetworkName=${{ env.VNETHUB }} \
+                vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                subnetName=${{ env.SUBNETPEP }} \
+                privateEndpointResourceId=$ACRID \
+                privateDnsResourceGroup=${{ env.NETWORKRESOURCEGROUP }}                
