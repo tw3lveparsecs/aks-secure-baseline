@@ -1,0 +1,61 @@
+name: Generates Certificates
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+    - main
+    paths:     
+    - .github/workflows/generate-certs.yml
+  push:
+    branches:
+    - poc
+    paths:    
+    - .github/workflows/generate-certs.yml
+
+jobs:
+  build:
+    if: ${{ github.ref == 'refs/heads/poc' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: drop
+        path: |
+          ./.github/actions/setvars
+          ./.github/variables       
+        if-no-files-found: error
+
+  deploy:
+    if: ${{ github.ref == 'refs/heads/poc' }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: drop
+          path: drop
+
+      - name: Configure Environment Variables
+        uses: ./drop/.github/actions/setvars
+        with:
+          varFilePath: ./drop/.github/variables/*
+
+      - name: Login to Azure
+        uses: azure/login@v1.1
+        with:
+          creds: ${{ secrets[env.SECRET] }}
+          #enable-AzPSSession: true
+
+      - name: Generate Certificates
+        run: |
+          openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out appgw.crt -keyout appgw.key -subj "/CN=bicycle.contoso.com/O=Contoso Bicycle"
+          openssl pkcs12 -export -out appgw.pfx -in appgw.crt -inkey appgw.key -passout pass:
+          export APP_GATEWAY_LISTENER_CERTIFICATE=$(cat appgw.pfx | base64 | tr -d '\n')
+          echo $APP_GATEWAY_LISTENER_CERTIFICATE
+        shell: bash
