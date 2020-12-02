@@ -58,14 +58,16 @@ jobs:
         uses: Azure/cli@v1.0.0
         with:
           inlineScript: |
-            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out appgw.crt -keyout appgw.key -subj "/CN=bicycle.contoso.com/O=Contoso Bicycle"
+            export DOMAINNAME=(`echo $${{ env.DOMAIN }} | tr '.' ' '`)
+            echo $DOMAINNAME
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out appgw.crt -keyout appgw.key -subj "/CN=bicycle.${{ env.DOMAIN }}/O=$DOMAINNAME Bicycle"
             openssl pkcs12 -export -out appgw.pfx -in appgw.crt -inkey appgw.key -passout pass:
             export APP_GATEWAY_LISTENER_CERTIFICATE=$(cat appgw.pfx | base64 | tr -d '\n')
             echo $APP_GATEWAY_LISTENER_CERTIFICATE
 
-            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out traefik-ingress-internal-aks-ingress-contoso-com-tls.crt -keyout traefik-ingress-internal-aks-ingress-contoso-com-tls.key -subj "/CN=*.aks-ingress.contoso.com/O=Contoso Aks Ingress"
-            export AKS_INGRESS_CONTROLLER_CERTIFICATE_BASE64=$(cat traefik-ingress-internal-aks-ingress-contoso-com-tls.crt | base64 | tr -d '\n')
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out traefik-ingress-internal-aks-tls.crt -keyout traefik-ingress-internal-aks-tls.key -subj "/CN=*.aks-ingress.${{ env.DOMAIN }}/O=$DOMAINNAME Aks Ingress"
+            export AKS_INGRESS_CONTROLLER_CERTIFICATE_BASE64=$(cat traefik-ingress-internal-aks-tls.crt | base64 | tr -d '\n')
             rm appgw.pfx
             rm appgw.crt
-            rm traefik-ingress-internal-aks-ingress-contoso-com-tls.crt
-            rm traefik-ingress-internal-aks-ingress-contoso-com-tls.key
+            rm traefik-ingress-internal-aks-tls.crt
+            rm traefik-ingress-internal-aks-tls.key
