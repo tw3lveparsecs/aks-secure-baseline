@@ -80,9 +80,9 @@
             }
         },
         {
-            "apiVersion": "2015-03-20",
+            "apiVersion": "2020-08-01",
             "name": "PrometheusQuery1",
-            "type": "Microsoft.OperationalInsights/savedSearches",
+            "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
             "dependsOn": [
                 "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
@@ -95,9 +95,9 @@
             }
         },
         {
-            "apiVersion": "2015-03-20",
+            "apiVersion": "2020-08-01",
             "name": "PrometheusQuery2",
-           "type": "Microsoft.OperationalInsights/savedSearches",
+            "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
             "dependsOn": [
                 "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
@@ -110,9 +110,9 @@
             }
         },
         {
-            "apiVersion": "2015-03-20",
+            "apiVersion": "2020-08-01",
             "name": "PrometheusQuery3",
-            "type": "Microsoft.OperationalInsights/savedSearches",
+            "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
             "dependsOn": [
                 "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
             ],
