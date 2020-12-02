@@ -44,9 +44,9 @@ jobs:
           path: drop
 
       - name: Configure Environment Variables
-        uses: ./drop/.github/actions/setvars
+        uses: ./drop/actions/setvars
         with:
-          varFilePath: ./drop/.github/variables/*
+          varFilePath: ./drop/variables/*
 
       - name: Login to Azure
         uses: azure/login@v1.1
