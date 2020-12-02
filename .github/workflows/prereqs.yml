@@ -17,7 +17,7 @@ on:
     - poc/armtemplates/KeyVault/*
     - poc/armtemplates/ApplicationGateway/*
     - poc/armtemplates/PrivateDnsZones/*
-    - poc/armtemplates/PrivateEndpoint/*        
+    - poc/armtemplates/PrivateEndpoint/*
     - .github/variables/prereqs.env
     - .github/workflows/prereqs.yml
   push:
@@ -35,7 +35,7 @@ on:
     - poc/armtemplates/KeyVault/*
     - poc/armtemplates/ApplicationGateway/*
     - poc/armtemplates/PrivateDnsZones/*
-    - poc/armtemplates/PrivateEndpoint/*         
+    - poc/armtemplates/PrivateEndpoint/*
     - .github/variables/prereqs.env
     - .github/workflows/prereqs.yml
 
@@ -102,7 +102,7 @@ jobs:
           poc/armtemplates/KeyVault/*
           poc/armtemplates/ApplicationGateway/*
           poc/armtemplates/PrivateDnsZones/*
-          poc/armtemplates/PrivateEndpoint/*               
+          poc/armtemplates/PrivateEndpoint/*
         if-no-files-found: error
 
   deploy:
@@ -394,17 +394,17 @@ jobs:
       #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
       #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
 
-      - name: Deploy Private Dns Zones
-        uses: Azure/cli@v1.0.0
-        with:
-          inlineScript: |
-            az deployment group create \
-              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/PrivateDnsZones/azuredeploy.json \
-              --parameters drop/poc/armtemplates/PrivateDnsZones/azuredeploy.parameters.json \
-              --parameters \
-                virtualNetworkName=${{ env.VNETHUB }} \
-                vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }}  
+      # - name: Deploy Private Dns Zones
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/PrivateDnsZones/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/PrivateDnsZones/azuredeploy.parameters.json \
+      #         --parameters \
+      #           virtualNetworkName=${{ env.VNETHUB }} \
+      #           vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }}
 
       - name: Deploy PrivateEndpoint - KeyVault
         uses: Azure/cli@v1.0.0
@@ -417,6 +417,6 @@ jobs:
               --parameters drop/poc/armtemplates/PrivateEndpoint/azuredeploy.keyvault.parameters.json \
               --parameters \
                 virtualNetworkName=${{ env.VNETHUB }} \
-                vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \                 
+                vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
                 subnetName=${{ env.SUBNETPEP }} \
                 privateEndpointResourceId=$KVID
