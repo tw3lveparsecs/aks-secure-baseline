@@ -97,21 +97,6 @@
             }
         },
         {
-            "apiVersion": "2020-01-01",
-            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-            "name": "[concat(parameters('privateDnsZone'), '/', parameters('virtualNetworkName'), '-lnk')]",
-            "location": "global",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/privateEndpoints/', variables('privateEndpointName'))]"
-            ],
-            "properties": {
-                "virtualNetwork": {
-                    "id": "[resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-                },
-                "registrationEnabled": false
-            }
-        },
-        {
             "type": "Microsoft.Network/privateEndpoints/providers/locks",
             "name": "[concat(variables('privateEndpointName'), '/Microsoft.Authorization/', variables('privateEndpointName'), '-lck')]",
             "dependsOn": [
