@@ -1,0 +1,76 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "Virutal network name."
+            }
+        },
+        "vnetResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Virtual network resource group."
+            }
+        },
+        "privateDnsZones": {
+            "type": "array",
+            "metadata": {
+                "description": "Private dns zones."
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "apiVersion": "2020-01-01",
+            "type": "Microsoft.Network/privateDnsZones",
+            "name": "[parameters('privateDnsZones')[copyIndex()]]",
+            "location": "global",
+            "copy": {
+                "name": "dnsloop",
+                "count": "[length(parameters('privateDnsZones'))]"
+            },
+            "properties": {
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/providers/locks",
+            "name": "[concat(parameters('privateDnsZones')[copyIndex()], '/Microsoft.Authorization/', parameters('privateDnsZones')[copyIndex()], '-lck')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones/', parameters('privateDnsZones')[copyIndex()])]"
+            ],
+            "apiVersion": "2017-04-01",
+            "copy": {
+                "name": "dnsloop",
+                "count": "[length(parameters('privateDnsZones'))]"
+            },
+            "properties": {
+                "level": "CannotDelete"
+            }
+        },
+        {
+            "apiVersion": "2020-01-01",
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "name": "[concat(parameters('privateDnsZones')[copyIndex()], '/', parameters('virtualNetworkName'), '-lnk')]",
+            "location": "global",
+            "dependsOn": [
+                "dnsloop"
+            ],
+            "copy": {
+                "name": "dnslinkloop",
+                "count": "[length(parameters('privateDnsZones'))]"
+            },
+            "properties": {
+                "virtualNetwork": {
+                    "id": "[resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+                },
+                "registrationEnabled": false
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

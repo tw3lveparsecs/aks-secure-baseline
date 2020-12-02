@@ -348,42 +348,69 @@ jobs:
       #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
       #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
 
-      - name: Deploy Managed Identities
-        uses: Azure/cli@v1.0.0
-        with:
-          inlineScript: |
-            az identity create --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }}
-            az group create --name ${{ env.AKSRESOURCEGROUP }} --location ${{ env.LOCATION }}
-            az identity create --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }}
+      # - name: Deploy Managed Identities
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az identity create --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }}
+      #       az group create --name ${{ env.AKSRESOURCEGROUP }} --location ${{ env.LOCATION }}
+      #       az identity create --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }}
 
-            UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[principalId]" --output tsv)
-            az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAPPGWID --certificate-permissions get --secret-permissions get
+      #       UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[principalId]" --output tsv)
+      #       az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAPPGWID --certificate-permissions get --secret-permissions get
 
-            UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[principalId]" --output tsv)
-            az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAKSICID --certificate-permissions get --secret-permissions get
+      #       UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[principalId]" --output tsv)
+      #       az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAKSICID --certificate-permissions get --secret-permissions get
 
-      - name: Deploy Application Gateway
+      # - name: Deploy Application Gateway
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az deployment group create \
+      #         --resource-group ${{ env.APPGWRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/ApplicationGateway/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/ApplicationGateway/azuredeploy.parameters.json \
+      #         --parameters \
+      #           applicationGatewayName=${{ env.APPGWNAME }} \
+      #           tier=${{ env.APPGWTIER }} \
+      #           skuSize=${{ env.APPGWSKU }} \
+      #           capacity=${{ env.APPGWCAPACITY }} \
+      #           autoScaleMaxCapacity=${{ env.APPGWMAXCAPACITY }} \
+      #           publicIpAddressName=${{ env.APPGWPIP }} \
+      #           virtualNetworkName=${{ env.VNETHUB }} \
+      #           vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+      #           subnetName=${{ env.APPGWSUBNET }} \
+      #           userAssignedIdentity=${{ env.UMIAPPGW }} \
+      #           firewallPolicyName=${{ env.APPGWFWLPOLICY }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+
+      - name: Deploy Private Dns Zones
         uses: Azure/cli@v1.0.0
         with:
           inlineScript: |
             az deployment group create \
-              --resource-group ${{ env.APPGWRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/ApplicationGateway/azuredeploy.json \
-              --parameters drop/poc/armtemplates/ApplicationGateway/azuredeploy.parameters.json \
+              --resource-group ${{ env.NETWORKRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/PrivateDnsZones/azuredeploy.json \
+              --parameters drop/poc/armtemplates/PrivateDnsZones/azuredeploy.parameters.json \
               --parameters \
-                applicationGatewayName=${{ env.APPGWNAME }} \
-                tier=${{ env.APPGWTIER }} \
-                skuSize=${{ env.APPGWSKU }} \
-                capacity=${{ env.APPGWCAPACITY }} \
-                autoScaleMaxCapacity=${{ env.APPGWMAXCAPACITY }} \
-                publicIpAddressName=${{ env.APPGWPIP }} \
                 virtualNetworkName=${{ env.VNETHUB }} \
-                vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
-                subnetName=${{ env.APPGWSUBNET }} \
-                userAssignedIdentity=${{ env.UMIAPPGW }} \
-                firewallPolicyName=${{ env.APPGWFWLPOLICY }} \
-                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
-                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
-                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
-                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
-                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
+                vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }}  
+
+      - name: Deploy PrivateEndpoint - KeyVault
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            KVID=$(az keyvault show --name ${{ env.KVNAME }} --resource-group ${{ env.KVRESOURCEGROUP }} --query "[id]" --output tsv)
+            az deployment group create \
+              --resource-group ${{ env.KVRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/PrivateEndpoint/azuredeploy.json \
+              --parameters drop/poc/armtemplates/PrivateEndpoint/azuredeploy.keyvault.parameters.json \
+              --parameters \
+                virtualNetworkName=${{ env.VNETHUB }} \
+                vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \                 
+                subnetName=${{ env.SUBNETPEP }} \
+                privateEndpointResourceId=$KVID
