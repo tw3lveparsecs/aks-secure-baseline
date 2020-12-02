@@ -14,7 +14,8 @@ on:
     - poc/armtemplates/RouteTable/*
     - poc/armtemplates/Vnet/*
     - poc/armtemplates/VnetPeering/*
-    - poc/armtemplates/KeyVault/*    
+    - poc/armtemplates/KeyVault/*
+    - poc/armtemplates/ApplicationGateway/*
     - .github/variables/prereqs.env
     - .github/workflows/prereqs.yml
   push:
@@ -29,7 +30,8 @@ on:
     - poc/armtemplates/RouteTable/*
     - poc/armtemplates/Vnet/*
     - poc/armtemplates/VnetPeering/*
-    - poc/armtemplates/KeyVault/*        
+    - poc/armtemplates/KeyVault/*
+    - poc/armtemplates/ApplicationGateway/*
     - .github/variables/prereqs.env
     - .github/workflows/prereqs.yml
 
@@ -93,7 +95,8 @@ jobs:
           poc/armtemplates/RouteTable/*
           poc/armtemplates/Vnet/*
           poc/armtemplates/VnetPeering/*
-          poc/armtemplates/KeyVault/*          
+          poc/armtemplates/KeyVault/*
+          poc/armtemplates/ApplicationGateway/*
         if-no-files-found: error
 
   deploy:
@@ -320,7 +323,7 @@ jobs:
       #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
       #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
       #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
-      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }} 
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
 
       # - name: Deploy Key Vault
       #   uses: Azure/cli@v1.0.0
@@ -343,18 +346,44 @@ jobs:
       #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
       #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
       #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
-      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                                                                                                                
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}
 
-      - name: Deploy Managed Identities
+      # - name: Deploy Managed Identities
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       az identity create --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }}
+      #       az group create --name ${{ env.AKSRESOURCEGROUP }} --location ${{ env.LOCATION }}
+      #       az identity create --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }}
+
+      #       UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[principalId]" --output tsv)
+      #       az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAPPGWID --certificate-permissions get --secret-permissions get
+
+      #       UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[principalId]" --output tsv)
+      #       az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAKSICID --certificate-permissions get --secret-permissions get
+
+      - name: Deploy Application Gateway
         uses: Azure/cli@v1.0.0
         with:
           inlineScript: |
-            az identity create --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }}
-            az group create --name ${{ env.AKSRESOURCEGROUP }} --location ${{ env.LOCATION }}
-            az identity create --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }}   
-            
-            UMIAPPGWID=$(az identity show --name ${{ env.UMIAPPGW }} --resource-group ${{ env.APPGWRESOURCEGROUP }} --query "[principalId]" --output tsv)
-            az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAPPGWID --certificate-permissions get --secret-permissions get 
-            
-            UMIAKSICID=$(az identity show --name ${{ env.UMIAKSIC }} --resource-group ${{ env.AKSRESOURCEGROUP }} --query "[principalId]" --output tsv)
-            az keyvault set-policy --name ${{ env.KVNAME }} --object-id $UMIAKSICID --certificate-permissions get --secret-permissions get             
+            az deployment group create \
+              --resource-group ${{ env.APPGWRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/ApplicationGateway/azuredeploy.json \
+              --parameters drop/poc/armtemplates/ApplicationGateway/azuredeploy.parameters.json \
+              --parameters \
+                applicationGatewayName=${{ env.APPGWNAME }} \
+                tier=${{ env.APPGWTIER }} \
+                skuSize=${{ env.APPGWSKU }} \
+                capacity=${{ env.APPGWCAPACITY }} \
+                autoScaleMaxCapacity=${{ env.APPGWMAXCAPACITY }} \
+                publicIpAddressName=${{ env.APPGWPIP }} \
+                virtualNetworkName=${{ env.VNETHUB }} \
+                vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+                subnetName=${{ env.APPGWSUBNET }} \
+                userAssignedIdentity=${{ env.UMIAPPGW }} \
+                firewallPolicyName=${{ env.APPGWFWLPOLICY }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}

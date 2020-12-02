@@ -1,0 +1,503 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "applicationGatewayName": {
+            "type": "string",
+            "metadata": {
+                "description": "Application gateway network name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Application gateway location."
+            }
+        },
+        "tier": {
+            "type": "string",
+            "allowedValues": [
+                "Standard",
+                "WAF",
+                "Standard_v2",
+                "WAF_v2"
+            ],
+            "metadata": {
+                "description": "Application gateway tier."
+            }
+        },
+        "skuSize": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_Small",
+                "Standard_Medium",
+                "Standard_Large",
+                "WAF_Medium",
+                "WAF_Large",
+                "Standard_v2",
+                "WAF_v2"
+            ],
+            "metadata": {
+                "description": "Application gateway SKU."
+            }
+        },
+        "capacity": {
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 32,
+            "metadata": {
+                "description": "Capacity (instance count) of application gateway."
+            }
+        },
+        "autoScaleMaxCapacity": {
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 32,
+            "metadata": {
+                "description": "Capacity (instance count) of application gateway."
+            }
+        },
+        "publicIpAddressName": {
+            "type": "string",
+            "metadata": {
+                "description": "Public ip address name."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "Virutal network name."
+            }
+        },
+        "vnetResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Virtual network resource group."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Application gateway subnet name."
+            }
+        },
+        "sslCertificates": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the ssl certificates."
+            }
+        },
+        "trustedRootCertificates": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the trusted root certificates."
+            }
+        },
+        "httpListeners": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the http listeners."
+            }
+        },
+        "backendAddressPools": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the backend address pools."
+            }
+        },
+        "backendHttpSettings": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the backend http settings."
+            }
+        },
+        "rules": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the routing rules."
+            }
+        },
+        "redirectConfigurations": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the rules redirect configurations."
+            }
+        },
+        "frontEndPorts": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the custom probes."
+            }
+        },
+        "customProbes": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the custom probes."
+            }
+        },
+        "userAssignedIdentity": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the user assigned identity used to obtain certificates from key vault."
+            }
+        },
+        "firewallPolicyName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the firewall policy."
+            }
+        },
+        "firewallPolicySettings": {
+            "type": "object",
+            "metadata": {
+                "description": "Array containing the firewall policy settings."
+            }
+        },
+        "firewallPolicyCustomRules": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the firewall policy custom rules."
+            }
+        },
+        "firewallPolicyManagedRuleSets": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the firewall policy managed rule sets."
+            }
+        },
+        "firewallPolicyManagedRuleExclusions": {
+            "type": "array",
+            "metadata": {
+                "description": "Array containing the firewall policy managed rule exclusions."
+            }
+        },
+        "diagnosticStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostic storage account name."
+            }
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Diagnostic storage account resource group."
+            }
+        },
+        "logAnalyticsWorkspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace name."
+            }
+        },
+        "logAnalyticsSubscriptionID": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace subscription Id."
+            }
+        },
+        "logAnalyticsResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Log analytics workspace resource group name."
+            }
+        }
+    },
+    "variables": {
+        "diagnosticRetentionInDays": 30
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-02-01",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[parameters('publicIpAddressName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIpAddresses/providers/diagnosticSettings",
+            "name": "[concat(parameters('publicIpAddressName'), '/Microsoft.Insights/', parameters('publicIpAddressName'), '-dgs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+            ],
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "name": "[concat(parameters('publicIpAddressName'), '-dgs')]",
+                "storageAccountId": "[resourceId(parameters('diagnosticStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                "workspaceId": "[resourceId(parameters('logAnalyticsSubscriptionID'), parameters('logAnalyticsResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                "logs": [
+                    {
+                        "category": "DDoSProtectionNotifications",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "DDoSMitigationFlowLogs",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "DDoSMitigationReports",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ],
+                "metrics": [
+                    {
+                        "category": "AllMetrics",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "enabled": true,
+                            "days": "[variables('diagnosticRetentionInDays')]"
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            "type": "Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('firewallPolicyName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "customRules": "[parameters('firewallPolicyCustomRules')]",
+                "policySettings": "[parameters('firewallPolicySettings')]",
+                "managedRules": {
+                    "managedRuleSets": "[parameters('firewallPolicyManagedRuleSets')]",
+                    "exclusions": "[parameters('firewallPolicyManagedRuleExclusions')]"
+                }
+            }
+        },
+        {
+            "name": "[parameters('applicationGatewayName')]",
+            "type": "Microsoft.Network/applicationGateways",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpAddressName'))]",
+                "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('firewallPolicyName'))]"
+            ],
+            "apiVersion": "2020-05-01",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities',  parameters('userAssignedIdentity'))]": {}
+                }
+            },
+            "properties": {
+                "sku": {
+                    "name": "[parameters('skuSize')]",
+                    "tier": "[parameters('tier')]"
+                },
+                "autoscaleConfiguration": {
+                    "minCapacity": "[parameters('capacity')]",
+                    "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
+                },
+                "enableHttp2": false,
+                "webApplicationFirewallConfiguration": {
+                    "enabled": true,
+                    "firewallMode": "Detection",
+                    "ruleSetType": "OWASP",
+                    "ruleSetVersion": "3.0"
+                },
+                "gatewayIPConfigurations": [
+                    {
+                        "name": "appGatewayIpConfig",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
+                            }
+                        }
+                    }
+                ],
+                "frontendIPConfigurations": [
+                    {
+                        "name": "appGwPublicFrontendIp",
+                        "properties": {
+                            "PublicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "frontendPorts": "[parameters('frontEndPorts')]",
+                "probes": "[parameters('customProbes')]",
+                "backendAddressPools": "[parameters('backendAddressPools')]",
+                "firewallPolicy": {
+                    "id": "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('firewallPolicyName'))]"
+                },
+                "copy": [
+                    {
+                        "name": "trustedRootCertificates",
+                        "count": "[length(parameters('trustedRootCertificates'))]",
+                        "input": {
+                            "name": "[parameters('trustedRootCertificates')[copyIndex('trustedRootCertificates')].name]",
+                            "properties": {
+                                "keyVaultSecretId": "[concat(reference(resourceId('Microsoft.KeyVault/vaults', parameters('trustedRootCertificates')[copyIndex('trustedRootCertificates')].keyVaultName),'2018-02-14').vaultUri, 'secrets/', parameters('trustedRootCertificates')[copyIndex('trustedRootCertificates')].secretName)]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "sslCertificates",
+                        "count": "[length(parameters('sslCertificates'))]",
+                        "input": {
+                            "name": "[parameters('sslCertificates')[copyIndex('sslCertificates')].name]",
+                            "properties": {
+                                "keyVaultSecretId": "[concat(reference(resourceId('Microsoft.KeyVault/vaults', parameters('sslCertificates')[copyIndex('sslCertificates')].keyVaultName),'2018-02-14').vaultUri, 'secrets/', parameters('sslCertificates')[copyIndex('sslCertificates')].secretName)]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "backendHttpSettingsCollection",
+                        "count": "[length(parameters('backendHttpSettings'))]",
+                        "input": {
+                            "name": "[parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].name]",
+                            "properties": {
+                                "port": "[parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].port]",
+                                "protocol": "[parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].protocol]",
+                                "cookieBasedAffinity": "[parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].cookieBasedAffinity]",
+                                "affinityCookieName": "[if(not(empty(parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].affinityCookieName)), parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].affinityCookieName, json('null'))]",
+                                "requestTimeout": "[parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].requestTimeout]",
+                                "connectionDraining": "[parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].connectionDraining]",
+                                "probe": "[if(not(empty(parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].probeName)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/applicationGateways/probes', parameters('applicationGatewayName'), parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].probeName), '\"}')), json('null'))]",
+                                "trustedRootCertificates": "[if(not(empty(parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].trustedRootCertificate)), json(concat('[{\"id\": \"', resourceId('Microsoft.Network/applicationGateways/trustedRootCertificates', parameters('applicationGatewayName'), parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].trustedRootCertificate), '\"}]')), json('null'))]",
+                                "hostName": "[if(not(empty(parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].hostName)), parameters('backendHttpSettings')[copyIndex('backendHttpSettingsCollection')].hostName, json('null'))]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "httpListeners",
+                        "count": "[length(parameters('httpListeners'))]",
+                        "input": {
+                            "name": "[parameters('httpListeners')[copyIndex('httpListeners')].name]",
+                            "properties": {
+                                "frontendIPConfiguration": {
+                                    "id": "[resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', parameters('applicationGatewayName'), 'appGwPublicFrontendIp')]"
+                                },
+                                "frontendPort": {
+                                    "id": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', parameters('applicationGatewayName'), parameters('httpListeners')[copyIndex('httpListeners')].frontEndPort)]"
+                                },
+                                "protocol": "[parameters('httpListeners')[copyIndex('httpListeners')].protocol]",
+                                "sslCertificate": "[if(not(empty(parameters('httpListeners')[copyIndex('httpListeners')].sslCertificate)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/applicationGateways/sslCertificates', parameters('applicationGatewayName'), parameters('httpListeners')[copyIndex('httpListeners')].sslCertificate), '\"}')), json('null'))]",
+                                "hostNames": "[if(not(empty(parameters('httpListeners')[copyIndex('httpListeners')].hostNames)), parameters('httpListeners')[copyIndex('httpListeners')].hostNames, json('null'))]",
+                                "hostName": "[if(not(empty(parameters('httpListeners')[copyIndex('httpListeners')].hostName)), parameters('httpListeners')[copyIndex('httpListeners')].hostName, json('null'))]",
+                                "requireServerNameIndication": "[parameters('httpListeners')[copyIndex('httpListeners')].requireServerNameIndication]",
+                                "firewallPolicy": "[if(equals(parameters('httpListeners')[copyIndex('httpListeners')].firewallPolicy, 'enabled'), json(concat('{\"id\": \"', resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('firewallPolicyName')), '\"}')), json('null'))]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "requestRoutingRules",
+                        "count": "[length(parameters('rules'))]",
+                        "input": {
+                            "name": "[parameters('rules')[copyIndex('requestRoutingRules')].name]",
+                            "properties": {
+                                "RuleType": "[parameters('rules')[copyIndex('requestRoutingRules')].ruleType]",
+                                "httpListener": "[if(not(empty(parameters('rules')[copyIndex('requestRoutingRules')].listener)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/applicationGateways/httpListeners', parameters('applicationGatewayName'), parameters('rules')[copyIndex('requestRoutingRules')].listener), '\"}')), json('null'))]",
+                                "backendAddressPool": "[if(not(empty(parameters('rules')[copyIndex('requestRoutingRules')].backendPool)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/applicationGateways/backendAddressPools', parameters('applicationGatewayName'), parameters('rules')[copyIndex('requestRoutingRules')].backendPool), '\"}')), json('null'))]",
+                                "backendHttpSettings": "[if(not(empty(parameters('rules')[copyIndex('requestRoutingRules')].backendHttpSettings)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', parameters('applicationGatewayName'), parameters('rules')[copyIndex('requestRoutingRules')].backendHttpSettings), '\"}')), json('null'))]",
+                                "redirectConfiguration": "[if(not(empty(parameters('rules')[copyIndex('requestRoutingRules')].redirectConfiguration)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/applicationGateways/redirectConfigurations', parameters('applicationGatewayName'), parameters('rules')[copyIndex('requestRoutingRules')].redirectConfiguration), '\"}')), json('null'))]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "redirectConfigurations",
+                        "count": "[length(parameters('redirectConfigurations'))]",
+                        "input": {
+                            "name": "[parameters('redirectConfigurations')[copyIndex('redirectConfigurations')].name]",
+                            "properties": {
+                                "redirectType": "[parameters('redirectConfigurations')[copyIndex('redirectConfigurations')].redirectType]",
+                                "targetUrl": "[parameters('redirectConfigurations')[copyIndex('redirectConfigurations')].targetUrl]",
+                                "targetListener": "[if(not(empty(parameters('redirectConfigurations')[copyIndex('redirectConfigurations')].targetListener)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/applicationGateways/httpListeners', parameters('applicationGatewayName'), parameters('redirectConfigurations')[copyIndex('redirectConfigurations')].targetListener), '\"}')), json('null'))]",
+                                "includePath": "[parameters('redirectConfigurations')[copyIndex('redirectConfigurations')].includePath]",
+                                "includeQueryString": "[parameters('redirectConfigurations')[copyIndex('redirectConfigurations')].includeQueryString]",
+                                "requestRoutingRules": [
+                                    {
+                                        "id": "[resourceId('Microsoft.Network/applicationGateways/requestRoutingRules', parameters('applicationGatewayName'), parameters('redirectConfigurations')[copyIndex('redirectConfigurations')].requestRoutingRule)]"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/applicationGateways/providers/diagnosticSettings",
+            "name": "[concat(parameters('applicationGatewayName'),'/Microsoft.Insights/', parameters('applicationGatewayName'), '-dgs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/applicationGateways', parameters('applicationGatewayName'))]"
+            ],
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "name": "[concat(parameters('applicationGatewayName'),'-dgs')]",
+                "storageAccountId": "[resourceId(parameters('diagnosticStorageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                "workspaceId": "[resourceId(parameters('logAnalyticsSubscriptionID'), parameters('logAnalyticsResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                "logs": [
+                    {
+                        "category": "ApplicationGatewayAccessLog",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "ApplicationGatewayPerformanceLog",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    },
+                    {
+                        "category": "ApplicationGatewayFirewallLog",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ],
+                "metrics": [
+                    {
+                        "category": "AllMetrics",
+                        "enabled": true,
+                        "retentionPolicy": {
+                            "days": "[variables('diagnosticRetentionInDays')]",
+                            "enabled": true
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/applicationGateways/providers/locks",
+            "name": "[concat(parameters('applicationGatewayName'), '/Microsoft.Authorization/', parameters('applicationGatewayName'), '-lck')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/applicationGateways', parameters('applicationGatewayName'))]"
+            ],
+            "apiVersion": "2017-04-01",
+            "properties": {
+                "level": "CannotDelete"
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

@@ -1,0 +1,232 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "applicationGatewayName": {
+            "value": null
+        },
+        "tier": {
+            "value": null
+        },
+        "skuSize": {
+            "value": null
+        },
+        "capacity": {
+            "value": null
+        },
+        "autoScaleMaxCapacity": {
+            "value": null
+        },
+        "publicIpAddressName": {
+            "value": null
+        },
+        "virtualNetworkName": {
+            "value": null
+        },
+        "vnetResourceGroup": {
+            "value": null
+        },
+        "subnetName": {
+            "value": null
+        },
+        "userAssignedIdentity": {
+            "value": null
+        },
+        "firewallPolicyName": {
+            "value": null
+        },
+        "diagnosticStorageAccountName": {
+            "value": null
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "value": null
+        },
+        "logAnalyticsWorkspaceName": {
+            "value": null
+        },
+        "logAnalyticsSubscriptionID": {
+            "value": null
+        },
+        "logAnalyticsResourceGroup": {
+            "value": null
+        },
+        "customProbes": {
+            "value": [
+                /* Example below
+                {
+                    "name": "prd-https-mft-prb",
+                    "properties": {
+                        "protocol": "Https",
+                        "host": "microsoft.com.au",
+                        "path": "/",
+                        "interval": 30,
+                        "timeout": 10,
+                        "unhealthyThreshold": 3,
+                        "pickHostNameFromBackendHttpSettings": false,
+                        "minServers": 0,
+                        "match": {
+                            "statusCodes": [
+                                "200-399"
+                            ]
+                        }
+                    }
+                }*/
+            ]
+        },
+        "frontEndPorts": {
+            "value": [
+                {
+                    "name": "port_80",
+                    "properties": {
+                        "port": 80
+                    }
+                } /*,
+                {
+                    "name": "port_443",
+                    "properties": {
+                        "port": 443
+                    }
+                }*/
+            ]
+        },
+        "backendAddressPools": {
+            "value": [
+                {
+                    "name": "prd-mft-bpl",
+                    "properties": {
+                        "backendAddresses": [
+                            {
+                                "ipAddress": "10.1.2.3"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "sslCertificates": {
+            "value": [
+                /*{
+                    "name": "microsoft.com.au",
+                    "keyVaultName": "shd-mft-coreservices-kvt",
+                    "secretName": "microsoft-com-au"
+                }*/
+            ]
+        },
+        "trustedRootCertificates": {
+            "value": [
+                /* Example below
+                {
+                    "name": "customrootca",
+                    "keyVaultName": "shd-mft-coreservices-kvt",
+                    "secretName": "customrootca"
+                }*/
+            ]
+        },
+        "backendHttpSettings": {
+            "value": [
+                {
+                    "name": "prd-http-80-mft-bes",
+                    "port": 8,
+                    "protocol": "Http",
+                    "cookieBasedAffinity": "Enabled",
+                    "affinityCookieName": "prd-http-80-mft-afn",
+                    "requestTimeout": 300,
+                    "connectionDraining": {
+                        "drainTimeoutInSec": 60,
+                        "enabled": true
+                    },
+                    "probeName": null,
+                    "hostName": null,
+                    "trustedRootCertificate": null
+                }
+            ]
+        },
+        "httpListeners": {
+            "value": [
+                {
+                    "name": "prd-http-80-mft-lst",
+                    "protocol": "Http",
+                    "port": "80",
+                    "sslCertificate": null,
+                    "hostNames": [],
+                    "hostName": null, // used for multi-site
+                    "frontEndPort": "port_80",
+                    "requireServerNameIndication": false,
+                    "firewallPolicy": "disabled"
+                } /*,
+                {
+                    "name": "prd-http-443-mft-lst",
+                    "protocol": "Https",
+                    "port": "443",
+                    "sslCertificate": "microsoft.com.au",
+                    "hostNames": [
+                        "microsoft.com.au"
+                    ],
+                    "hostName": null, // used for multi-site
+                    "frontEndPort": "port_433",
+                    "requireServerNameIndication": false,
+                    "firewallPolicy": "disabled"
+                }*/
+            ]
+        },
+        "rules": {
+            "value": [
+                {
+                    "name": "prd-http-80-mft-rle",
+                    "ruleType": "Basic",
+                    "listener": "prd-http-80-mft-lst",
+                    "backendPool": "prd-mft-bpl",
+                    "backendHttpSettings": "prd-http-80-mft-bes",
+                    "redirectConfiguration": null
+                }
+                /* Example redirect rule below
+                ,{
+                    "name": "prd-http-443-mft-rle",
+                    "ruleType": "Basic",
+                    "listener": "prd-http-443-mft-lst",
+                    "backendPool": null,
+                    "backendHttpSettings": null,
+                    "redirectConfiguration": "prd-http-443-mft-rdt"
+                }*/
+            ]
+        },
+        "redirectConfigurations": {
+            "value": [
+                /* Example of redirect configuration
+                {
+                    "name": "prd-http-80-mft-rdt",
+                    "redirectType": "Permanent",
+                    "targetUrl": "https://www.microsoft.com.au",
+                    "targetListener": null,
+                    "includePath": true,
+                    "includeQueryString": true,
+                    "requestRoutingRule": "prd-http-80-mft-rle"
+                } */
+            ]
+        },
+        "firewallPolicySettings": {
+            "value": {
+                "requestBodyCheck": true,
+                "maxRequestBodySizeInKb": 128,
+                "fileUploadLimitInMb": 100,
+                "state": "Enabled",
+                "mode": "Detection"
+            }
+        },
+        "firewallPolicyManagedRuleSets": {
+            "value": [
+                {
+                    "ruleSetType": "OWASP",
+                    "ruleSetVersion": "3.0",
+                    "ruleGroupOverrides": []
+                }
+            ]
+        },
+        "firewallPolicyManagedRuleExclusions": {
+            "value": []
+        },
+        "firewallPolicyCustomRules": {
+            "value": []
+        }
+    }
+}
