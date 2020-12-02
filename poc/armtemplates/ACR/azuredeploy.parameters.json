@@ -1,0 +1,53 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "acrName": {
+            "value": null
+        },
+        "sku": {
+            "value": null
+        },
+        "adminUserEnabled": {
+            "value": null
+        },
+        "enableReplication": {
+            "value": null
+        },
+        "geoRedundancyLocation": {
+            "value": null
+        },
+        "diagnosticStorageAccountName": {
+            "value": null
+        },
+        "diagnosticStorageAccountResourceGroup": {
+            "value": null
+        },
+        "logAnalyticsWorkspaceName": {
+            "value": null
+        },
+        "logAnalyticsSubscriptionID": {
+            "value": null
+        },
+        "logAnalyticsResourceGroup": {
+            "value": null
+        },
+        "policies": {
+            "value": [
+                {
+                    "quarantinePolicy": {
+                        "status": "disabled"
+                    },
+                    "trustPolicy": {
+                        "type": "Notary",
+                        "status": "disabled"
+                    },
+                    "retentionPolicy": {
+                        "days": 15,
+                        "status": "enabled"
+                    }
+                }
+            ]
+        }
+    }
+}
