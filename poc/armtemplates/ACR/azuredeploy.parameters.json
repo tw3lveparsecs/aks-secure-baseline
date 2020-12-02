@@ -48,6 +48,11 @@
                     }
                 }
             ]
+        },
+        "networkRules": {
+            "value": {
+                "defaultAction": "Deny"
+            }
         }
     }
 }

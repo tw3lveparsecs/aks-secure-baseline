@@ -445,18 +445,18 @@ jobs:
                 logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
                 logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                                
 
-      - name: Deploy PrivateEndpoint - ACR
-        uses: Azure/cli@v1.0.0
-        with:
-          inlineScript: |
-            ACRID=$(az acr show --name ${{ env.ACRNAME }} --resource-group ${{ env.ACRRESOURCEGROUP }} --query "[id]" --output tsv)
-            az deployment group create \
-              --resource-group ${{ env.ACRRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/PrivateEndpoint/azuredeploy.json \
-              --parameters drop/poc/armtemplates/PrivateEndpoint/azuredeploy.acr.parameters.json \
-              --parameters \
-                virtualNetworkName=${{ env.VNETHUB }} \
-                vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
-                subnetName=${{ env.SUBNETPEP }} \
-                privateEndpointResourceId=$ACRID \
-                privateDnsResourceGroup=${{ env.NETWORKRESOURCEGROUP }}                
+      # - name: Deploy PrivateEndpoint - ACR
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |
+      #       ACRID=$(az acr show --name ${{ env.ACRNAME }} --resource-group ${{ env.ACRRESOURCEGROUP }} --query "[id]" --output tsv)
+      #       az deployment group create \
+      #         --resource-group ${{ env.ACRRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/PrivateEndpoint/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/PrivateEndpoint/azuredeploy.acr.parameters.json \
+      #         --parameters \
+      #           virtualNetworkName=${{ env.VNETHUB }} \
+      #           vnetResourceGroup=${{ env.NETWORKRESOURCEGROUP }} \
+      #           subnetName=${{ env.SUBNETPEP }} \
+      #           privateEndpointResourceId=$ACRID \
+      #           privateDnsResourceGroup=${{ env.NETWORKRESOURCEGROUP }}                

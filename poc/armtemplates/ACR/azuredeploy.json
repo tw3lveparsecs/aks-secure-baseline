@@ -38,6 +38,12 @@
                 "description": "Azure Container Registry policies."
             }
         },
+        "networkRules": {
+            "type": "object",
+            "metadata": {
+                "description": "Azure Container Registry network rules."
+            }
+        },
         "enableReplication": {
             "type": "bool",
             "defaultValue": false,
@@ -96,6 +102,7 @@
             },
             "properties": {
                 "adminUserEnabled": "[parameters('adminUserEnabled')]",
+                "networkRuleSet": "[parameters('networkRules')]",
                 "policies": "[parameters('policies')]"
             }
         },
