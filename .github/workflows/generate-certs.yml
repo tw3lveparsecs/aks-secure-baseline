@@ -34,7 +34,7 @@ jobs:
 
   deploy:
     if: ${{ github.ref == 'refs/heads/poc' }}
-    needs: build
+    #needs: build
     runs-on: ubuntu-latest
     steps:
       # - name: Download Build Artifacts
