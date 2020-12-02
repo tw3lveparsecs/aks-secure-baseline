@@ -7,13 +7,13 @@ on:
     - main
     paths:   
     - .github/variables/prereqs.env
-    - .github/workflows/prereqs.yml
+    - .github/workflows/generate-certs.yml
   push:
     branches:
     - poc
     paths:
     - .github/variables/prereqs.env
-    - .github/workflows/prereqs.yml
+    - .github/workflows/generate-certs.yml
 
 jobs:
   build:
