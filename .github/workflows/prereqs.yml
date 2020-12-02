@@ -146,20 +146,20 @@ jobs:
       #           kind=${{ env.DIAGSTORAGEKIND }} \
       #           softDeleteRetentionDays=${{ env.DIAGSTORAGERETENTION }}
 
-      # - name: Deploy Log Analytics
-      #   uses: Azure/cli@v1.0.0
-      #   with:
-      #     inlineScript: |
-      #       az deployment group create \
-      #         --resource-group ${{ env.LARESOURCEGROUP }} \
-      #         --template-file drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.json \
-      #         --parameters drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.parameters.json \
-      #         --parameters \
-      #           workspaceName=${{ env.LAWORKSPACENAME }} \
-      #           sku=${{ env.LASKU }} \
-      #           dataRetention=${{ env.LADATARETENTION }} \
-      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
-      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }}
+      - name: Deploy Log Analytics
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.LARESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.json \
+              --parameters drop/poc/armtemplates/LogAnalyticsWorkspace/azuredeploy.parameters.json \
+              --parameters \
+                workspaceName=${{ env.LAWORKSPACENAME }} \
+                sku=${{ env.LASKU }} \
+                dataRetention=${{ env.LADATARETENTION }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }}
 
       # - name: Deploy Network Watcher
       #   uses: Azure/cli@v1.0.0
@@ -425,25 +425,25 @@ jobs:
       #           privateEndpointResourceId=$KVID \
       #           privateDnsResourceGroup=${{ env.NETWORKRESOURCEGROUP }}
 
-      - name: Deploy ACR 
-        uses: Azure/cli@v1.0.0
-        with:
-          inlineScript: |            
-            az deployment group create \
-              --resource-group ${{ env.ACRRESOURCEGROUP }} \
-              --template-file drop/poc/armtemplates/ACR/azuredeploy.json \
-              --parameters drop/poc/armtemplates/ACR/azuredeploy.parameters.json \
-              --parameters \
-                acrName=${{ env.ACRNAME }} \
-                sku=${{ env.ACRSKU }} \
-                adminUserEnabled=${{ env.ACRADMINUSER }} \
-                enableReplication=${{ env.ACRREPLICATION }} \
-                geoRedundancyLocation=${{ env.ACRGEOLOCATION }} \
-                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
-                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
-                logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
-                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
-                logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                                
+      # - name: Deploy ACR 
+      #   uses: Azure/cli@v1.0.0
+      #   with:
+      #     inlineScript: |            
+      #       az deployment group create \
+      #         --resource-group ${{ env.ACRRESOURCEGROUP }} \
+      #         --template-file drop/poc/armtemplates/ACR/azuredeploy.json \
+      #         --parameters drop/poc/armtemplates/ACR/azuredeploy.parameters.json \
+      #         --parameters \
+      #           acrName=${{ env.ACRNAME }} \
+      #           sku=${{ env.ACRSKU }} \
+      #           adminUserEnabled=${{ env.ACRADMINUSER }} \
+      #           enableReplication=${{ env.ACRREPLICATION }} \
+      #           geoRedundancyLocation=${{ env.ACRGEOLOCATION }} \
+      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+      #           logAnalyticsWorkspaceName=${{ env.LAWORKSPACENAME }} \
+      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+      #           logAnalyticsResourceGroup=${{ env.LARESOURCEGROUP }}                                
 
       # - name: Deploy PrivateEndpoint - ACR
       #   uses: Azure/cli@v1.0.0
