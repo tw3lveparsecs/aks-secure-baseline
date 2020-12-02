@@ -16,42 +16,42 @@ on:
     - .github/workflows/generate-certs.yml
 
 jobs:
-  build:
-    if: ${{ github.ref == 'refs/heads/poc' }}
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v2
+  # build:
+  #   if: ${{ github.ref == 'refs/heads/poc' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout Repo
+  #     uses: actions/checkout@v2
 
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: drop
-        path: |
-          ./.github/actions/setvars
-          ./.github/variables
-        if-no-files-found: error
+  #   - name: Upload Build Artifacts
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: drop
+  #       path: |
+  #         ./.github/actions/setvars
+  #         ./.github/variables
+  #       if-no-files-found: error
 
   deploy:
     if: ${{ github.ref == 'refs/heads/poc' }}
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: drop
-          path: drop
+      # - name: Download Build Artifacts
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: drop
+      #     path: drop
 
-      - name: Configure Environment Variables
-        uses: ./drop/.github/actions/setvars
-        with:
-          varFilePath: ./drop/.github/variables/*
+      # - name: Configure Environment Variables
+      #   uses: ./drop/.github/actions/setvars
+      #   with:
+      #     varFilePath: ./drop/.github/variables/*
 
-      - name: Login to Azure
-        uses: azure/login@v1.1
-        with:
-          creds: ${{ secrets[env.SECRET] }}
+      # - name: Login to Azure
+      #   uses: azure/login@v1.1
+      #   with:
+      #     creds: ${{ secrets[env.SECRET] }}
 
       - name: Generate Certificates
         run: |
