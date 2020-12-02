@@ -20,7 +20,7 @@ on:
     - poc/armtemplates/PrivateEndpoint/*
     - poc/armtemplates/ACR/*    
     - .github/variables/prereqs.env
-    - .github/workflows/prereqs.yml
+    - .github/workflows/generate-certs.yml
   push:
     branches:
     - poc
@@ -39,7 +39,7 @@ on:
     - poc/armtemplates/PrivateEndpoint/*
     - poc/armtemplates/ACR/*    
     - .github/variables/prereqs.env
-    - .github/workflows/prereqs.yml
+    - .github/workflows/generate-certs.yml
 
 jobs:
   test:
