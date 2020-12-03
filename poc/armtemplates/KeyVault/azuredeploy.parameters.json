@@ -42,10 +42,9 @@
             "value": null
         },
         "accessPolicies": {
-            "value": [
-                /* Example below
+            "value": [                
                 {
-                    "objectId": "abc123de-fg45-6789-9hik1-abc123defg",
+                    "objectId": "e888e89d-9484-42d1-9135-da55e2b58f60",
                     "keys": [
                         "Get",
                         "List",
@@ -83,7 +82,7 @@
                         "SetIssuers",
                         "DeleteIssuers"
                     ]
-                }*/
+                }
             ]
         }
     }

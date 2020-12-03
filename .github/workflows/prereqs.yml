@@ -350,28 +350,28 @@ jobs:
       #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
       #           logAnalyticsResourceGroup=${{ env.LACSRESOURCEGROUP }}
 
-      # - name: Deploy Key Vault
-      #   uses: Azure/cli@v1.0.0
-      #   with:
-      #     inlineScript: |
-      #       az deployment group create \
-      #         --resource-group ${{ env.KVRESOURCEGROUP }} \
-      #         --template-file drop/poc/armtemplates/KeyVault/azuredeploy.json \
-      #         --parameters drop/poc/armtemplates/KeyVault/azuredeploy.parameters.json \
-      #         --parameters \
-      #           keyVaultName=${{ env.KVNAME }} \
-      #           sku=${{ env.KVSKU }} \
-      #           enabledForDeployment=${{ env.KVDEPLOYMENTENABLED }} \
-      #           enabledForTemplateDeployment=${{ env.KVTEMPLATEDEPLOYMENT }} \
-      #           enabledForDiskEncryption=${{ env.KVDISKENCRYPTION }} \
-      #           enableSoftDelete=${{ env.KVSOFTDELETE }} \
-      #           softDeleteRetentionInDays=${{ env.KVSOFTDELETERETENTION }} \
-      #           enablePurgeProtection=${{ env.KVPURGEPROTECTION }} \
-      #           diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
-      #           diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
-      #           logAnalyticsWorkspaceName=${{ env.LAAKSWORKSPACENAME }} \
-      #           logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
-      #           logAnalyticsResourceGroup=${{ env.LAAKSRESOURCEGROUP }}
+      - name: Deploy Key Vault
+        uses: Azure/cli@v1.0.0
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group ${{ env.KVRESOURCEGROUP }} \
+              --template-file drop/poc/armtemplates/KeyVault/azuredeploy.json \
+              --parameters drop/poc/armtemplates/KeyVault/azuredeploy.parameters.json \
+              --parameters \
+                keyVaultName=${{ env.KVNAME }} \
+                sku=${{ env.KVSKU }} \
+                enabledForDeployment=${{ env.KVDEPLOYMENTENABLED }} \
+                enabledForTemplateDeployment=${{ env.KVTEMPLATEDEPLOYMENT }} \
+                enabledForDiskEncryption=${{ env.KVDISKENCRYPTION }} \
+                enableSoftDelete=${{ env.KVSOFTDELETE }} \
+                softDeleteRetentionInDays=${{ env.KVSOFTDELETERETENTION }} \
+                enablePurgeProtection=${{ env.KVPURGEPROTECTION }} \
+                diagnosticStorageAccountName=${{ env.DIAGSTORAGEACCOUNT }} \
+                diagnosticStorageAccountResourceGroup=${{ env.DIAGSTORAGERESOURCEGROUP }} \
+                logAnalyticsWorkspaceName=${{ env.LAAKSWORKSPACENAME }} \
+                logAnalyticsSubscriptionID=${{ env.LAWORKSPACESUBID }} \
+                logAnalyticsResourceGroup=${{ env.LAAKSRESOURCEGROUP }}
 
       # - name: Deploy Managed Identities
       #   uses: Azure/cli@v1.0.0
