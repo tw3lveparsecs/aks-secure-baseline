@@ -481,7 +481,7 @@ jobs:
       #           privateDnsResourceGroup=${{ env.NETWORKRESOURCEGROUP }}
 
       - name: Generate Certificates
-        if: ${{ GENERATE_CERTS == 'yes' }}
+        if: ${{ env.GENERATE_CERTS == 'yes' }}
         uses: Azure/cli@v1.0.0
         with:
           inlineScript: |
