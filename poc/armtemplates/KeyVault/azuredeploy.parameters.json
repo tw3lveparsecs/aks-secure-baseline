@@ -44,7 +44,7 @@
         "accessPolicies": {
             "value": [                
                 {
-                    "objectId": "bd61aadd-9fa9-454c-822a-bce0e49170cc",
+                    "objectId": "c754dd90-cf73-4c32-86e7-6111d42fd44f",
                     "keys": [
                         "Get",
                         "List",
