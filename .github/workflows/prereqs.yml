@@ -42,7 +42,7 @@ on:
     - .github/workflows/prereqs.yml
 
 env:
-  GENERATE_CERTS: yes
+  GENERATE_CERTS: no
 
 jobs:
   test:
