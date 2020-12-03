@@ -63,12 +63,14 @@ jobs:
             openssl pkcs12 -export -out appgw.pfx -in appgw.crt -inkey appgw.key -passout pass:
             cat appgw.pfx | base64 | tr -d '\n' > appgw-base64.pfx            
             
-            openssl req -newkey rsa:2048 -new -nodes -x509 -days 365 -keyout key.pem -out traefik-ingress-internal-aks-tls.pem -subj "/CN=*.aks-ingress.${{ env.DOMAIN }}/O=$DOMAINNAME Aks Ingress"            
-                        
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out traefik-ingress-internal-aks-ingress-tls.crt -keyout traefik-ingress-internal-aks-ingress-tls.key -subj "/CN=*.aks-ingress.${{ env.DOMAIN }}/O=$DOMAINNAME Aks Ingress"            
+            export AKS_INGRESS_CONTROLLER_CERTIFICATE_BASE64=$(cat traefik-ingress-internal-aks-ingress-tls.crt | base64 | tr -d '\n')
+            
             az keyvault certificate import --file appgw.pfx --name bikeappwebcert --vault-name ${{ env.KVNAME }}
-            az keyvault certificate import --file traefik-ingress-internal-aks-tls-base64.pem --name bikeappaksiccert --vault-name ${{ env.KVNAME }}
+            az keyvault secret set --vault-name ${{ env.KVNAME }} --name bikeappaksiccert --value $AKS_INGRESS_CONTROLLER_CERTIFICATE_BASE64
 
             rm appgw.pfx
             rm appgw.crt
             rm appgw-base64.pfx
-            rm traefik-ingress-internal-aks-tls.pem
+            rm traefik-ingress-internal-aks-ingress-tls.crt
+            rm traefik-ingress-internal-aks-ingress-tls.key
