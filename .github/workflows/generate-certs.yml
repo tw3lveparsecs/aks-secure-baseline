@@ -58,7 +58,7 @@ jobs:
         uses: Azure/cli@v1.0.0
         with:
           inlineScript: |
-            export DOMAINNAME=(`echo $${{ env.DOMAIN }} | tr '.' ' '`)
+            export DOMAINNAME=(`echo ${{ env.DOMAIN }} | tr '.' ' '`)
             echo $DOMAINNAME
             openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out appgw.crt -keyout appgw.key -subj "/CN=bicycle.${{ env.DOMAIN }}/O=$DOMAINNAME Bicycle"
             openssl pkcs12 -export -out appgw.pfx -in appgw.crt -inkey appgw.key -passout pass:
