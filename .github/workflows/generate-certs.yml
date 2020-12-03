@@ -58,15 +58,17 @@ jobs:
         uses: Azure/cli@v1.0.0
         with:
           inlineScript: |
-            export DOMAINNAME=(`echo ${{ env.DOMAIN }} | tr '.' ' '`)
-            echo $DOMAINNAME
+            export DOMAINNAME=(`echo ${{ env.DOMAIN }} | tr '.' ' '`)            
             openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out appgw.crt -keyout appgw.key -subj "/CN=bicycle.${{ env.DOMAIN }}/O=$DOMAINNAME Bicycle"
             openssl pkcs12 -export -out appgw.pfx -in appgw.crt -inkey appgw.key -passout pass:
-            export APP_GATEWAY_LISTENER_CERTIFICATE=$(cat appgw.pfx | base64 | tr -d '\n')
-            echo $APP_GATEWAY_LISTENER_CERTIFICATE
+            export APP_GATEWAY_LISTENER_CERTIFICATE_BASE64=$(cat appgw.pfx | base64 | tr -d '\n')            
 
             openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out traefik-ingress-internal-aks-tls.crt -keyout traefik-ingress-internal-aks-tls.key -subj "/CN=*.aks-ingress.${{ env.DOMAIN }}/O=$DOMAINNAME Aks Ingress"
             export AKS_INGRESS_CONTROLLER_CERTIFICATE_BASE64=$(cat traefik-ingress-internal-aks-tls.crt | base64 | tr -d '\n')
+            
+            #upload to kv here!!!!
+
+
             rm appgw.pfx
             rm appgw.crt
             rm traefik-ingress-internal-aks-tls.crt
